@@ -4,12 +4,14 @@ from collections import defaultdict
 from typing import Dict, Union
 from IPython.display import display, Latex #type: ignore
 
+from ..printing.printable import Printable
+
 from .fundamental_unit import FundamentalUnit
 from .basic_typing import UnitDict
 
 
 @dataclass(frozen=True, slots=True)
-class UnitComposition:
+class UnitComposition(Printable):
     """
     Representa una combinación de unidades fundamentales y sus exponentes.
     
@@ -17,9 +19,9 @@ class UnitComposition:
         kg·m/s^2 se representa como {FundamentalUnits.KG: 1, FundamentalUnits.M: 1, FundamentalUnits.S: -2}.
     """
     
-    unit_dict: "UnitDict"
+    unit_dict: UnitDict
 
-    def __init__(self, unit_dict: Union["UnitDict", UnitComposition]) -> None:
+    def __init__(self, unit_dict: Union[UnitDict, UnitComposition]) -> None:
         if isinstance(unit_dict, UnitComposition):
             unit_dict = unit_dict.unit_dict
         if not isinstance(unit_dict, dict): #type: ignore
@@ -60,35 +62,16 @@ class UnitComposition:
 
     def _clean(self) -> UnitComposition:
         """Devuelve una nueva composición sin unidades con exponente 0."""
-         # Pequeño bug corregido
-        cleaned: UnitDict = {unit: power for unit, power in self.unit_dict.items() if power != 0}
-
-        return UnitComposition(cleaned)
+        return UnitComposition({unit: power for unit, power in self.unit_dict.items() if power != 0})
 
     def __str__(self) -> str:
         from .unit_printer import UnitPrinter
         return UnitPrinter.py_str(self.unit_dict) # devuelve una str de python con los * como · y los exponentes como superindices
 
-    def display_latex(self): 
-        display(Latex(self._latex()))
-
-    def _latex(self): # devuelve una string en formato laTex
+    def _repr_latex_(self): # devuelve una string en formato laTex
         from .unit_printer import UnitPrinter
         return "$" + UnitPrinter.latex_str(self.unit_dict) + "$" 
-    
-    def latex(self): #devuele una string en formato laTex sin $
-        from .unit_printer import UnitPrinter
-        return UnitPrinter.latex_str(self.unit_dict)
-    
-    def __repr__(self) -> str:
-        try:
-            get_ipython() # type: ignore
-            self.display_latex()
-            return ''
-        except NameError:
-            return f"UnitComposition({self.unit_dict})"
-    
-    
+        
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, UnitComposition):
             return NotImplemented

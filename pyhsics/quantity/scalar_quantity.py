@@ -75,7 +75,7 @@ class ScalarQuantity(Quantity[Scalar]):
     
     def __pow__(self, other: Union[ScalarLike, Scalar, ScalarQuantity]) -> ScalarQuantity:
         if isinstance(other, ScalarQuantity):
-            if not other.units.is_one:
+            if not other.units.is_one():
                 raise ValueError(f'Sólo se puede elevar a una cantidad adimensional. ({str(self)})^({str(other)})')
             other = other.value
         if isinstance(other, Scalar):

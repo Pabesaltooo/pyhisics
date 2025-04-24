@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 from IPython.display import display, Latex #type: ignore
 
+from ..printing.printable import Printable
 from ..linalg import ScalarLike
 
 
@@ -12,7 +13,7 @@ from .prefixed_unit import PrefixedUnit
 from .alias_manager import UnitAliasManager
 
 @dataclass(frozen=True, slots=True) 
-class Unit:
+class Unit(Printable):
     """
     Clase Publica para el manejo de unidades.
     
@@ -83,30 +84,12 @@ class Unit:
         return new_unit
         
     def __str__(self) -> str:
-        #if self._visualize_formula:
-        #    return f'{self.formula}'
-        
         base = str(self.composition)
         return base if self.prefix == 1.0 else f'{self.prefix} {base}'
-    
-    def display_latex(self):
-        display(Latex(self._repr_latex_()))
 
     def _repr_latex_(self): # devuelve una string en formato laTex
         from .unit_printer import UnitPrinter
         return "$" + UnitPrinter.latex_str(self.composition.unit_dict) + "$" 
-    
-    def latex(self): #devuele una string en formato laTex sin $
-        from .unit_printer import UnitPrinter
-        return UnitPrinter.latex_str(self.composition.unit_dict)
-    
-    def __repr__(self) -> str:
-        try:
-            get_ipython() # type: ignore
-            self.display_latex()
-            return ''
-        except NameError:
-            return f'Unit({str(self)})'
     
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Unit):
@@ -142,6 +125,5 @@ class Unit:
         )
         return Unit.from_prefixed_unit(new)
     
-    @property
     def is_one(self):
         return self.composition.unit_dict == {}

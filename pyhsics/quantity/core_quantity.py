@@ -154,7 +154,7 @@ class Quantity(QAddable[T], QMultiplyable[T], Printable, ABC, Generic[T]):
         return self.value.is_zero()
     
     def is_identity(self) -> bool:
-        return self.value.is_identity() and self.units.is_one
+        return self.value.is_identity() and self.units.is_one()
 
     # ---------- utilidades --------------------------------------------------
     def __hash__(self) -> int:

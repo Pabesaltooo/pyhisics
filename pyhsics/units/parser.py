@@ -3,16 +3,13 @@ Módulo parser para unidades.
 
 Provee la conversión de cadenas de texto en objetos de unidades a través de prefijos SI y unidades personalizadas.
 """
-
 from typing import Optional, Dict, Any, Callable, Union
+from math import pi
 
 from .fundamental_unit import FundamentalUnit
 from .basic_typing import UnitDict, RealLike
 from .prefixed_unit import PrefixedUnit
 from .alias_manager import UnitAliasManager
-
-
-
 
 # Diccionario de prefijos SI (clave: prefijo, valor: factor numérico)
 PREFIXES_MAP: Dict[str, float] = {
@@ -39,9 +36,8 @@ PREFIXES_MAP: Dict[str, float] = {
     "y": 1e-24,
 }
 
-from math import pi
 
-CUSTOM_UNITS: Dict[str, PrefixedUnit] = {
+NOT_SI_UNITS: Dict[str, PrefixedUnit] = {
     "ºC":   PrefixedUnit(1,         {FundamentalUnit.TEMPERATURE: 1}),  # Celsius
     "ºF":   PrefixedUnit(1,         {FundamentalUnit.TEMPERATURE: 1}),  # Fahrenheit
     "day":  PrefixedUnit(86400,     {FundamentalUnit.TIME: 1}),
@@ -161,8 +157,8 @@ def resolve_prefixed_identifier(ident: str, mapping: Dict[str, Any]) -> Optional
             remainder = ident[len(prefix):]
             if remainder in mapping:
                 return PrefixedUnit(PREFIXES_MAP[prefix], {mapping[remainder]: 1})
-            if remainder in CUSTOM_UNITS:
-                custom_unit = CUSTOM_UNITS[remainder]
+            if remainder in NOT_SI_UNITS:
+                custom_unit = NOT_SI_UNITS[remainder]
                 return PrefixedUnit(PREFIXES_MAP[prefix] * custom_unit.prefix, custom_unit.unit_dict)
     return None
 
@@ -242,8 +238,8 @@ class UnitParser:
                 raise ValueError
             self.eat(UnitToken.IDENT)
             # Primero se verifica en CUSTOM_UNITS
-            if ident in CUSTOM_UNITS:
-                return CUSTOM_UNITS[ident]
+            if ident in NOT_SI_UNITS:
+                return NOT_SI_UNITS[ident]
             # Se intenta resolver el identificador con prefijo en el mapping
             resolved = resolve_prefixed_identifier(ident, self.mapping)
             if resolved is not None:
@@ -313,14 +309,3 @@ def alias_resolver(alias: str) -> PrefixedUnit:
         if alias in alias_list:
             return PrefixedUnit(1.0, UnitComposition(dict(key)))
     raise UnitParseError(f"Alias de unidad '{alias}' no encontrado.")
-
-if __name__ == '__main__':
-    # Ejemplo de uso del parser
-    from .unit_composition import FundamentalUnit
-
-    # Ejemplo: "C**2 * s**4 * kg **-1 * m ** -3"
-    text = "C**2 * s**4 * kg **-1 * m ** -3"
-    mapping = {unit.value: unit for unit in FundamentalUnit}
-    parser = UnitParser(text, mapping, alias_resolver)
-    result = parser.parse()
-    print(result)

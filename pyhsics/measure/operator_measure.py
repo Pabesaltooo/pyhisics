@@ -60,7 +60,7 @@ class MeasureAlgebraicOperator:
     @classmethod
     def pow(cls, measure1: Operable, measure2: Operable) -> DirectMeasure:
         (base, e1, unit1), (exponent, _, unit2) = cls._init(measure1, measure2)
-        if not unit2.is_one:
+        if not unit2.is_one():
             raise ValueError("El exponente debe ser un número adimensional.")
         
         new_value = base ** exponent

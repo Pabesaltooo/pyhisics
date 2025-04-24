@@ -1,6 +1,11 @@
-from enum import Enum
+from enum import Enum, EnumMeta
+from abc import ABCMeta
+from ..printing.printable import Printable
 
-class FundamentalUnit(Enum):
+class ABCEnumMeta(EnumMeta, ABCMeta):
+    pass
+
+class FundamentalUnit(Printable, Enum, metaclass=ABCEnumMeta):
     """Enumeración de unidades fundamentales del SI."""
     ONE                 = '1'    # Adimensional
     ANGLE               = 'rad'  # Radianes (adimensional)
@@ -17,6 +22,10 @@ class FundamentalUnit(Enum):
 
     def __repr__(self) -> str:
         return f"<{self.name}>"
+
+    def _repr_latex_(self) -> str:
+        return f'$ \\text{{{self.value}}} $'
+
     
     
 # Orden sugerido para la representación
