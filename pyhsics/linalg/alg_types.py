@@ -1,6 +1,4 @@
-from abc import ABC, abstractmethod
 from typing import Union, List
-from numbers import Real
 
 from .sscalar import Scalar
 from .vvector import Vector, Poly

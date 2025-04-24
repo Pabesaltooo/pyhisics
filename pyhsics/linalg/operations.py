@@ -343,7 +343,7 @@ class MatrixMultiplyable(Multiplyable):
                 AlgebraicOperator.mul_matrix_matrix(self.value, other.value))
         raise TypeError(f"Operación no soportada para Vector y {type(other)}.")
           
-class BaseAlgebraicComparableClass(Multiplyable, ABC):
+class ComparationInterface(Multiplyable, ABC):
     def __eq__(self, other: object) -> bool:
         if isinstance(other, AlgebraicClass):
             return AlgebraicComparator.equal(self.value, other.value)
@@ -397,7 +397,7 @@ class BaseAlgebraicComparableClass(Multiplyable, ABC):
         except TypeError as e:
             raise e
             
-class BaseAlgebraicOperableClass(Multiplyable, ABC):
+class OperationInterface(Multiplyable, ABC):
     @abstractmethod
     def __add__(self, other: Addable) -> Algebraic:
         pass
@@ -438,62 +438,16 @@ class BaseAlgebraicOperableClass(Multiplyable, ABC):
     
     def __rmul__(self, other: Union[Multiplyable, T_Scalar]) -> Algebraic:
         return self.__mul__(other)
- 
-class BaseAlgebraicPrintableClass(ABC):    
-    @abstractmethod
-    def __str__(self) -> str:
-        pass
-    
-    @abstractmethod
-    def _repr_latex_(self, name: Optional[str] = None) -> str:
-        pass
-    
-    @classmethod
-    def _normalice_value(cls, scalar: T_Scalar) -> Tuple[T_Scalar, int]:
-        """Dado un valor numérico, devuelve una tupla (valor_normalizado, exponente).
-        Cada subclase debe definir cómo normaliza su valor."""
-        from .alg_types import T_Scalar        
-        if not isinstance(scalar, T_Scalar):
-            return (scalar, 1)
-        if scalar == 0:
-            return (0, 0)
-        exponent = floor(log10(abs(scalar)))
-        factor: int = 10 ** exponent
-        value_norm = scalar / factor
-        if isinstance(scalar, float) and value_norm.is_integer():
-            value_norm = int(value_norm)
-        else:
-            value_norm = round(value_norm, 4)
-        return (value_norm, exponent)
-    
-    def latex(self):
-        return self._repr_latex_().replace('$', '')
-    
-    def __repr__(self) -> str:
-        try:
-            get_ipython() # type: ignore
-            self.display_latex()
-            return ''
-        except NameError:
-            return f'{self.__class__.__name__}({self.latex()})'
-    
-    def display_latex(self, name: Optional[str] = None) -> None:
-        display(Latex(self._repr_latex_()))
-    
-BACC = BaseAlgebraicComparableClass
-BAOC = BaseAlgebraicOperableClass
-BAPC = BaseAlgebraicPrintableClass
 
-class NotSymbolic:
-    pass
 
-class AlgebraicClass(BACC, BAOC, BAPC, Multiplyable, NotSymbolic, ABC):   
-    @property
+from ..printing.printable import Printable
+
+class AlgebraicClass(ComparationInterface, OperationInterface, 
+                     Multiplyable, Printable, ABC):   
     @abstractmethod
     def is_zero(self) -> bool:
         pass
     
-    @property
     @abstractmethod
     def is_identity(self) -> bool: 
         pass

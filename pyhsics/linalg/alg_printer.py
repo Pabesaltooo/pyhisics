@@ -1,10 +1,28 @@
 from dataclasses import dataclass
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, Tuple
+from math import floor, log10
 
-from .alg_types import Vector, Scalar, Matrix, Poly
+from .alg_types import Vector, Scalar, Matrix, Poly, T_Scalar
 
 from .symbolic_math.symbolic_operator import SymPrintable
 
+
+def _normalice_scalar(scalar: T_Scalar) -> Tuple[T_Scalar, int]:
+    """Dado un valor numérico, devuelve una tupla (valor_normalizado, exponente).
+    Cada subclase debe definir cómo normaliza su valor."""
+    from .alg_types import T_Scalar        
+    if not isinstance(scalar, T_Scalar): # type: ignore
+        return (scalar, 1)
+    if scalar == 0:
+        return (0, 0)
+    exponent = floor(log10(abs(scalar)))
+    factor: int = 10 ** exponent
+    value_norm = scalar / factor
+    if isinstance(scalar, float) and value_norm.is_integer():
+        value_norm = int(value_norm)
+    else:
+        value_norm = round(value_norm, 4)
+    return (value_norm, exponent)
 
 @dataclass
 class LatexFormatter:
@@ -26,7 +44,7 @@ class LatexFormatter:
             r_v = round(v, 4)
             return str(int(r_v)) if float(r_v).is_integer() else str(r_v)
         else:
-            norm, exp = vec._normalice_value(v)
+            norm, exp = _normalice_scalar(v)
             if exp == 0:
                 return str(norm)
             elif norm == 1:
@@ -63,7 +81,7 @@ class LatexFormatter:
         # En realidad un vetor no deberia tener ningun obejto que no fuera escalar dentro de si, pero a veces si que meto symbols o expresiones dentro...
         # Caso: todos los no nulos comparten exponente
         if not any(isinstance(v, SymPrintable) for v in vec):
-            exponents = [vec._normalice_value(v)[1] for v in vec.value if v != 0]
+            exponents = [_normalice_scalar(v)[1] for v in vec.value if v != 0]
         else:
             exponents = []
             
@@ -107,7 +125,7 @@ class LatexFormatter:
             return str(int(adjusted)) if float(adjusted).is_integer() else str(adjusted)
 
         if not any(isinstance(v, SymPrintable) for row in mat for v in row):
-            exponents = [mat._normalice_value(v)[1] for row in mat.value for v in row if v != 0]
+            exponents = [_normalice_scalar(v)[1] for row in mat.value for v in row if v != 0]
         else:
             exponents = []
             
