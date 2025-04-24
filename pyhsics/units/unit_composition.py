@@ -17,9 +17,9 @@ class UnitComposition:
         kg·m/s^2 se representa como {FundamentalUnits.KG: 1, FundamentalUnits.M: 1, FundamentalUnits.S: -2}.
     """
     
-    unit_dict: UnitDict
+    unit_dict: "UnitDict"
 
-    def __init__(self, unit_dict: Union[UnitDict, UnitComposition]) -> None:
+    def __init__(self, unit_dict: Union["UnitDict", UnitComposition]) -> None:
         if isinstance(unit_dict, UnitComposition):
             unit_dict = unit_dict.unit_dict
         if not isinstance(unit_dict, dict): #type: ignore

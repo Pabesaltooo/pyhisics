@@ -1,33 +1,35 @@
-from .ppoint import Point
-#from .vector import Vector
-from .sscalar import Scalar
-from .vvector import Vector, Poly
-from .mmatrix import Matrix
-from .linear_sistem import LinearSistem
-from .alg_types import (Algebraic, T_Algebraic, 
-                         T_Scalar, T_Vector, T_Matrix, T2Algebraic) # type: ignore
+from typing import Union
 
-from .symbolic_math.symbol import Symbol, symbols
+#from .vector import Vector
+from .scalar import Scalar
+from .vector import Vector
+from .matrix import Matrix
+from .linear_sistem import LinearSistem
+from .algebraic_core import ScalarLike, VectorLike, MatrixLike, Algebraic, T2Algebraic
+
+"""from .symbolic_math.symbol import Symbol, symbols
 from .symbolic_math.term import Term
 from .symbolic_math.expression import Expression
 from .symbolic_math.symbolic_operator import Pow
+"""
+AlgLike = Union[ScalarLike, VectorLike, MatrixLike]
+ALG = Union[Scalar, Vector, Matrix]
 
 __all__ = [
-    'Point',
     'Scalar',
     'Vector',
     'Matrix',
     
-    'Poly',
     'LinearSistem',
     
-    'Algebraic',
-    'T_Algebraic',
-    
-    
+    'ALG',
+    'AlgLike',
+    'Algebraic'
+]
+"""    
     'Symbol', 
     'symbols', 
     'Term', 
     'Expression',
     'Pow'
-]
+]"""

@@ -2,8 +2,10 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 from IPython.display import display, Latex #type: ignore
 
-from ..linalg import T_Scalar
+from ..linalg import ScalarLike
 
+
+from .basic_typing import RealLike
 from .fundamental_unit import FundamentalUnit
 from .unit_composition import UnitComposition
 from .prefixed_unit import PrefixedUnit
@@ -26,7 +28,7 @@ class Unit:
     """
     alias_manager = UnitAliasManager
     formula: str
-    prefix: T_Scalar
+    prefix: ScalarLike
     composition: UnitComposition
     alias: Optional[str] = None
     _visualize_formula: bool = False
@@ -133,7 +135,7 @@ class Unit:
         )
         return Unit.from_prefixed_unit(new)
     
-    def __pow__(self, other: T_Scalar) -> 'Unit':
+    def __pow__(self, other: RealLike) -> 'Unit':
         new = PrefixedUnit(
             self.prefix ** other,
             self.composition ** other

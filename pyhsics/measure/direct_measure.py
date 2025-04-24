@@ -1,6 +1,6 @@
 from typing import Union
 
-from ..linalg import Scalar, T_Scalar
+from ..linalg import Scalar, ScalarLike
 
 from ..quantity import ScalarQuantity
 from ..units import Unit
@@ -30,8 +30,8 @@ class DirectMeasure(MeasureBaseClass):
         return self._units
 
     def __init__(self, 
-                 value: Union[ScalarQuantity, Scalar, T_Scalar], 
-                 error: Union[ScalarQuantity, Scalar, T_Scalar], 
+                 value: Union[ScalarQuantity, Scalar, ScalarLike], 
+                 error: Union[ScalarQuantity, Scalar, ScalarLike], 
                  units: Union[str, Unit] = "1") -> None:
         
         from .utils_measure import round_measure, process_measure_error_unit

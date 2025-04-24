@@ -10,8 +10,8 @@ if TYPE_CHECKING:
     from .term import Term
     from .symbol import Symbol
 
-# Se asume que en el módulo alg_types se define la interfaz básica para objetos algebraicos.
-from ..alg_types import Algebraic, T_Scalar
+# Se asume que en el módulo algebraic_core se define la interfaz básica para objetos algebraicos.
+from ...linalg import Algebraic, ScalarLike
 
 # --- Tipo que agrupa los objetos "expresables" ---
 T_Expressable = Union[
@@ -19,8 +19,8 @@ T_Expressable = Union[
     "Term",
     "Expression",
     "Pow",            # Más adelante se define Pow
-    Algebraic,
-    T_Scalar,
+    Algebraic[Any],
+    ScalarLike,
     PyReal,
     PyComplex
 ]
@@ -69,10 +69,10 @@ class SymbolicOperator:
         from .expression import Expression
         from .term import Term
         from .symbol import Symbol
-        from ..sscalar import Scalar  # asumiendo que es la clase para escalares
+        from ..scalar import Scalar  # asumiendo que es la clase para escalares
 
         # 1) Si es int/float => pásalo a Scalar => Term => Expression
-        if isinstance(obj, T_Scalar):
+        if isinstance(obj, ScalarLike):
             # convirte a Scalar
             scalar_obj = Scalar(obj)
             return Expression([Term(scalar_obj, {})])
@@ -87,7 +87,7 @@ class SymbolicOperator:
         # 3) Si es un Symbol => Term => Expression
         if isinstance(obj, Symbol):
             # coef 1, symbols_exponents = {e: 1}
-            from ..sscalar import Scalar
+            from ..scalar import Scalar
             return Expression([Term(Scalar(1), {obj: 1})])
 
         # 4) Si es un Term => meterlo a Expression con 1 término
@@ -224,7 +224,7 @@ class SymbolicOperator:
         - Si n <  0 => 1 / (base_expr^(|n|)).
         """
         from .expression import Expression
-        from ..sscalar import Scalar
+        from ..scalar import Scalar
         # Caso n=0 => 1
         if n == 0:
             return Expression([Term(Scalar(1), {})])  # => 1

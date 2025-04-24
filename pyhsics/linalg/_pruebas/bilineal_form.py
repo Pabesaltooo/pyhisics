@@ -4,9 +4,9 @@ from dataclasses import dataclass
 from math import isclose
 
 if TYPE_CHECKING:
-    from ..sscalar import Scalar
-    from ..vvector import Vector
-    from ..mmatrix import Matrix
+    from ..scalar import Scalar
+    from ..vector import Vector
+    from ..matrix import Matrix
 
 @dataclass
 class BilinealForm:

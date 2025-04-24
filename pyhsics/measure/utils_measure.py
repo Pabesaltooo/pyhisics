@@ -2,14 +2,14 @@ from __future__ import annotations
 import math
 from typing import Tuple, Union, TYPE_CHECKING, SupportsFloat
 
-from ..linalg import T_Scalar, Scalar
+from ..linalg import ScalarLike, Scalar
 from ..units import Unit
 
 if TYPE_CHECKING:
     from .base_measure import MeasureBaseClass
     from .direct_measure import DirectMeasure
     
-Operable = Union[T_Scalar, Scalar, 'MeasureBaseClass']
+Operable = Union[ScalarLike, Scalar, 'MeasureBaseClass']
 
 def round_significant_error(error: SupportsFloat, sig: int = 1) -> float:
     error = float(error)
@@ -70,9 +70,9 @@ def get_prefix_and_composition(unit: Union[str,Unit]):
     composition = converted_unit.composition
     return prefix, composition
 
-def process_measure_error_unit(value: Union[T_Scalar, Scalar], error: T_Scalar, 
+def process_measure_error_unit(value: Union[ScalarLike, Scalar], error: ScalarLike, 
                             unit: Union[str, Unit]
-                            ) -> Tuple[T_Scalar,T_Scalar, Unit]:
+                            ) -> Tuple[ScalarLike,ScalarLike, Unit]:
     """
     Procesa el valor y la unidad, aplicando el factor del prefijo y creando la instancia de Unit.
     """    

@@ -1,5 +1,5 @@
-from typing import Dict
-from ..linalg import T_Scalar
+from typing import Mapping, Union
 from .fundamental_unit import FundamentalUnit
 
-UnitDict = Dict[FundamentalUnit, T_Scalar]
+RealLike = Union[int, float]
+UnitDict = Mapping[FundamentalUnit, RealLike]

@@ -26,8 +26,8 @@ class Matrix(Algebraic[List[List[Expression]]]):
 
 
       
-T_Vector = Sequence[Expression]    
-T_Matrix = Sequence[Sequence[Expression]]
+VectorLike = Sequence[Expression]    
+MatrixLike = Sequence[Sequence[Expression]]
 
 @dataclass(frozen=True)
 class AlgebraicOperator:
@@ -37,13 +37,13 @@ class AlgebraicOperator:
     def sum_scalar_scalar(cls, a: Algebraic[Expression], b: Algebraic[Expression]) -> Scalar:
         return a + b
     @classmethod
-    def sum_matrix_matrix(cls, a: T_Matrix, b: T_Matrix) -> T_Matrix:
+    def sum_matrix_matrix(cls, a: MatrixLike, b: MatrixLike) -> MatrixLike:
         if len(a) != len(b) or any(len(row) != len(other_row) for row, other_row in zip(a, b)):
             raise DimensionMatchError("Las matrices deben tener las mismas dimensiones.")
         return [[a_ij + b_ij for a_ij, b_ij in zip(row, other_row)]
                 for row, other_row in zip(a, b)]
     @classmethod
-    def sum_vector_vector(cls, a: T_Vector, b: T_Vector) -> T_Vector:
+    def sum_vector_vector(cls, a: VectorLike, b: VectorLike) -> VectorLike:
         if len(a) != len(b):
             raise DimensionMatchError("Los vectores deben tener la misma dimensión.")
         return [a_i + b_i for a_i, b_i in zip(a, b)]
@@ -53,26 +53,26 @@ class AlgebraicOperator:
         return a * b
     
     @classmethod
-    def mul_vector_scalar(cls, a: T_Vector, b: Expression) -> T_Vector:
+    def mul_vector_scalar(cls, a: VectorLike, b: Expression) -> VectorLike:
         return [a_i * b for a_i in a]
     
     @classmethod
-    def mul_vector_vector(cls, a: T_Vector, b: T_Vector, M: T_Matrix) -> Expression:
+    def mul_vector_vector(cls, a: VectorLike, b: VectorLike, M: MatrixLike) -> Expression:
         """Se usa el producto punto estandar de un espacio euclideo."""
         if len(a) != len(b):
             raise DimensionMatchError("Los vectores deben tener la misma dimensión.")
         return sum((Expression([_Term(a[i] * M[i][j] * b[j])]) for i in range(len(a)) for j in range(len(b))), start=Expression())
     
     @classmethod
-    def mul_vector_matrix(cls, a: T_Vector, b: T_Matrix) -> T_Vector:
+    def mul_vector_matrix(cls, a: VectorLike, b: MatrixLike) -> VectorLike:
         raise DimensionMatchError("Los vectores deben multiplicarse a la derecha de las matrices: `M * v`. Si no prueba `v.T * M`")
 
     @classmethod
-    def mul_matrix_scalar(cls, a: T_Matrix, b: Expression) -> T_Matrix:
+    def mul_matrix_scalar(cls, a: MatrixLike, b: Expression) -> MatrixLike:
         return [[a_ij * b for a_ij in row] for row in a]
     
     @classmethod
-    def mul_matrix_vector(cls, a: T_Matrix, b: T_Vector) -> Union[T_Vector, Expression]:
+    def mul_matrix_vector(cls, a: MatrixLike, b: VectorLike) -> Union[VectorLike, Expression]:
         if len(a[0]) != len(b):
             raise DimensionMatchError(f"Dimensiones incompatibles: {len(a[0])} x {len(a)} vs. {len(b)} x 1 para multiplicación de matriz por vector.")
         rv = [sum((a_ij * b_i for a_ij, b_i in zip(row, b)), start=Expression()) for row in a]
@@ -80,12 +80,12 @@ class AlgebraicOperator:
         
         
     @classmethod
-    def mul_matrix_matrix(cls, a: T_Matrix, b: T_Matrix) -> T_Matrix:
+    def mul_matrix_matrix(cls, a: MatrixLike, b: MatrixLike) -> MatrixLike:
         if len(a[0]) != len(b):
             raise DimensionMatchError(f"Dimensiones incompatibles: {len(a)} x {len(a[0])} vs. {len(b)} x {len(b[0])} para multiplicación matrices.")
-        result: T_Matrix  = []
+        result: MatrixLike  = []
         for i in range(len(a)):
-            new_row: T_Vector = []
+            new_row: VectorLike = []
             for j in range(len(b[0])):
                 sum_product = Expression()
                 for k in range(len(a[0])):
@@ -98,14 +98,14 @@ class AlgebraicOperator:
     def div_scalar(cls, a: Expression, b: Expression) -> Expression:
         return a / b
     @classmethod
-    def div_vector_scalar(cls, a: T_Vector, b: Expression) -> T_Vector:
+    def div_vector_scalar(cls, a: VectorLike, b: Expression) -> VectorLike:
         return [a_i / b for a_i in a]
     @classmethod
-    def div_matrix_scalar(cls, a: T_Matrix, b: Expression) -> T_Matrix:
+    def div_matrix_scalar(cls, a: MatrixLike, b: Expression) -> MatrixLike:
         return [[a_ij / b for a_ij in row] for row in a]
 
     @classmethod
-    def div(cls, a: Algebraic, b: Algebraic) -> Union[Expression, T_Vector, T_Matrix]:
+    def div(cls, a: Algebraic, b: Algebraic) -> Union[Expression, VectorLike, MatrixLike]:
         if not isinstance(b, Scalar):
             raise ValueError(f"No se puede dividir por un {type(b)}.")
         if isinstance(a, Scalar):

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Tuple, Optional, List, Dict
 
-from ..alg_types import T_Scalar, Algebraic
+from ..algebraic_core import ScalarLike, Algebraic
 
 from .symbolic_operator import ExprOperable, SymPrintable
 from .symbol import Symbol
@@ -9,7 +9,7 @@ from .term import Term
 
 
 
-def canonical_key(term: Term) -> Tuple[Tuple[Symbol, T_Scalar], ...]:
+def canonical_key(term: Term) -> Tuple[Tuple[Symbol, ScalarLike], ...]:
         """
         Dado un 'Term', retorna una tupla inmutable que represente
         la parte simbólica de manera única y ordenada.
@@ -69,7 +69,7 @@ class Expression(SymPrintable, ExprOperable):
         Combina términos que tengan la misma parte simbólica.
         El “truco” es agrupar por la tupla (Symbol->exponent) inmutable.
         """
-        accum: Dict[Tuple[Tuple[Symbol, T_Scalar], ...], Algebraic] = {}
+        accum: Dict[Tuple[Tuple[Symbol, ScalarLike], ...], Algebraic] = {}
         
         for term in self.terms:
             if term.is_zero():

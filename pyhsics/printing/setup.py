@@ -1,0 +1,59 @@
+# ~/.ipython/profile_default/startup/00-latex_collections.py
+
+from IPython import get_ipython
+
+ip = get_ipython()
+
+def seq_to_latex(seq, left_delim, right_delim):
+    # 1) SOLO si hay al menos un elem. con _repr_latex_
+    if not any(hasattr(item, '_repr_latex_') for item in seq):
+        return None
+
+    parts = []
+    for item in seq:
+        # Omitir None
+        if item is None:
+            continue
+
+        # Caso Printable
+        if hasattr(item, '_repr_latex_'):
+            latex = item._repr_latex_().strip('$')
+
+        # Números
+        elif isinstance(item, (int, float, complex)):
+            latex = f"\\;{item}\\;"
+
+        # Cadenas
+        elif isinstance(item, str):
+            safe = item.replace('{', '\\{').replace('}', '\\}')
+            latex = f"\\;\\text{{{safe}}}\\;"
+
+        else:
+            # Cualquier otro tipo rompe el formato y sale al repr normal
+            return None
+
+        parts.append(latex)
+
+    # Si tras filtrar sólo hubo None, volvemos al repr normal
+    if not parts:
+        return None
+
+    body = ',\\;'.join(parts)
+    return f"${left_delim}{body}{right_delim}$"
+
+
+def tuple_to_latex(tpl):
+    return seq_to_latex(tpl, r"\left(", r"\right)")
+
+def list_to_latex(lst):
+    return seq_to_latex(lst,  r"\left[", r"\right]")
+
+def set_to_latex(st):
+    # Ordenamos por repr para salida consistente
+    return seq_to_latex(sorted(st, key=lambda x: repr(x)), r"\left\{", r"\right\}")
+
+# Registrar formateadores LaTeX
+fmt = ip.display_formatter.formatters['text/latex']
+fmt.for_type(tuple, tuple_to_latex)
+fmt.for_type(list,  list_to_latex)
+fmt.for_type(set,   set_to_latex)

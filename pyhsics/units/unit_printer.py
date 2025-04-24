@@ -61,7 +61,7 @@ class UnitPrinter:
 
 
     @classmethod
-    def latex_str(cls, units: UnitDict) -> str:
+    def latex_str(cls, units: "UnitDict") -> str:
         """Devuelve la representación en LaTeX de las unidades."""
         sorted_units = cls._sort_units(units)
         parts: List[str] = []

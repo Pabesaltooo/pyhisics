@@ -1,6 +1,6 @@
 import unittest
 from pyhsics.quantity import Quantity
-from pyhsics.linalg.vvector import Vector
+from pyhsics.linalg.vector import Vector
 
 
 class TestQuantity(unittest.TestCase):

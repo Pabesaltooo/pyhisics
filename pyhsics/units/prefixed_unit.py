@@ -1,17 +1,17 @@
 from dataclasses import dataclass
 from typing import Union, Any
 
-from ..linalg import T_Scalar
+from ..linalg import ScalarLike
 
-from .basic_typing import UnitDict
+from .basic_typing import UnitDict, RealLike
 from .unit_composition import UnitComposition
 
 
 @dataclass(frozen=True, slots=True)
 class PrefixedUnit(UnitComposition):
-    prefix: T_Scalar = 1.0
+    prefix: ScalarLike = 1.0
 
-    def __init__(self, prefix: T_Scalar, units: Union[UnitComposition, UnitDict]) -> None:
+    def __init__(self, prefix: ScalarLike, units: Union[UnitComposition, UnitDict]) -> None:
         # Si 'units' es una instancia de UnitComposition, extraemos su diccionario
         if isinstance(units, UnitComposition):
             units = units.unit_dict
@@ -46,7 +46,7 @@ class PrefixedUnit(UnitComposition):
         new_comp = UnitComposition.__truediv__(self, other)
         return PrefixedUnit(new_prefix, new_comp.unit_dict)
 
-    def __pow__(self, exponent: T_Scalar) -> 'PrefixedUnit':
+    def __pow__(self, exponent: RealLike) -> 'PrefixedUnit':
         new_prefix = self.prefix ** exponent
         new_comp = UnitComposition.__pow__(self, exponent)
         return PrefixedUnit(new_prefix, new_comp.unit_dict)

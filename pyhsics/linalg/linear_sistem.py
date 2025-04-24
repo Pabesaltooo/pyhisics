@@ -1,30 +1,40 @@
 import sys
 from typing import List, Optional, Set, Union, Dict, Tuple
 import re
-from fractions import Fraction
 from math import lcm
 
-from .vvector import Vector
-from .mmatrix import Matrix
+from .complex_fraction import ComplexFraction
+from .vector import Vector
+from .matrix import Matrix
 
-from .alg_types import T_Scalar, T_Vector, T_Matrix
+from .algebraic_core import ScalarLike, VectorLike, MatrixLike
+from functools  import reduce
 
-def vector_to_integer_coords(vec_float: Union[T_Vector, Vector]) -> T_Vector:
+def vector_to_integer_coords(vec_float: Union[Vector,VectorLike]):
     """
-    Convierte un vector de floats en un vector con coeficientes enteros,
-    escalando según el mcm de denominadores.
+    Devuelve una lista de enteros que representan el vector original
+    una vez escalado por el MCM global.
+
+    • Si un elemento era real → se añade UN entero
+    • Si era complejo        → se añaden DOS: (Re, Im)
     """
-    # 1) Convertir a fracciones
-    fracs = [Fraction(f).limit_denominator(100000) for f in vec_float]
+    # 1) Fracciones exactas
+    fracs = [ComplexFraction(v).limit_denominator(100_000) for v in vec_float]
 
-    # 2) Calcular M = mcm de los denominadores
-    denoms = [f.denominator for f in fracs]
-    M = 1
-    for d in denoms:
-        M = lcm(M, d)
+    # 2) MCM de todos los denominadores
+    global_M = reduce(lcm, (f.denominator for f in fracs), 1)
 
-    # 3) Multiplicar cada fracción por M
-    return [int(M * f) for f in fracs]
+    # 3) Escalar y extraer enteros
+    int_coords: List[int] = []
+    for f in fracs:
+        scale = global_M // f.denominator      # entero exacto
+        num   = f.numerator * scale            # sigue siendo complejo ℤ+ℤ·j
+        if num.imag:                           # coordenada compleja
+            int_coords.extend([int(num.real), int(num.imag)])
+        else:                                  # coordenada real
+            int_coords.append(int(num.real))
+
+    return int_coords
 
 class LinearSistem:
     """
@@ -36,8 +46,8 @@ class LinearSistem:
 
     def __init__(
         self, 
-        value: Union[Matrix, T_Matrix],     # Matriz de coeficientes A
-        B: Union[Vector, T_Vector],         # Vector de términos independientes B
+        value: Union[Matrix, MatrixLike],     # Matriz de coeficientes A
+        B: Union[Vector, VectorLike],         # Vector de términos independientes B
         repr_mode: str = "Answers"
     ):
         """
@@ -142,7 +152,7 @@ class LinearSistem:
         # Caso (c): Infinitas soluciones
         # rank(A) = rankAug < m
         # Calculamos la solución particular y los vectores libres.
-        pivot_cols: List[T_Scalar] = []
+        pivot_cols: List[int] = []
         row_i = 0
         # Identificamos las columnas pivote en la RREF (salvo la última columna)
         for col_j in range(m):
@@ -157,7 +167,7 @@ class LinearSistem:
         free_cols = [j for j in range(m) if j not in pivot_cols]
 
         # Construimos la solución particular (poniendo a 0 las variables libres)
-        x_part = [0.0] * m
+        x_part = [0.0 + 0.0j] * m
         # Para cada fila pivote, en la RREF tenemos que X[pivot_col] = b_i
         # menos la contribución de las (posibles) variables libres. Pero
         # al poner las libres = 0, se simplifica a x_part[pivot_col] = M_rref[i][-1].
@@ -169,7 +179,7 @@ class LinearSistem:
         for free_col in free_cols:
             # Creamos un vector base, que corresponde a "poner 1 en la variable libre
             # 'free_col' y 0 en el resto de libres".
-            x_dir = [0.0] * m
+            x_dir = [0.0 + 0.0j] * m
             x_dir[free_col] = 1.0
 
             # Ajustamos las variables pivote según la ecuación de su fila:
@@ -288,7 +298,7 @@ class LinearSistem:
         #     Para generalidad, parsearemos la parte derecha igual que la izquierda
         #     y luego moveremos todo a la izquierda.
 
-        def parse_side(expr: str) -> Dict[str, float]:
+        def parse_side(expr: str) -> Dict[str, ScalarLike]:
             """
             Convierte una expresión tipo "2*x - 3*y + 4" en un dict:
             {
@@ -301,7 +311,7 @@ class LinearSistem:
             expr = expr.replace("-", "+-")
             # Dividimos por '+'
             terms = expr.split("+")
-            result: Dict[str, T_Scalar] = {}
+            result: Dict[str, ScalarLike] = {}
             result["_const"] = 0.0
 
             # Expresión regular para capturar un posible factor numérico
@@ -342,8 +352,8 @@ class LinearSistem:
             return result
 
         # Construimos las filas de la forma A y B
-        A: T_Matrix = []
-        B: T_Vector = []
+        A: MatrixLike = []
+        B: VectorLike = []
 
         for left, right in left_right_pairs:
             left_dict = parse_side(left)
@@ -355,7 +365,7 @@ class LinearSistem:
             left_dict["_const"] = left_dict["_const"] - right_dict["_const"]
 
             # A: coeficientes de las variables en orden
-            rowA: List[T_Scalar] = []
+            rowA: List[ScalarLike] = []
             for var in variables:
                 rowA.append(left_dict.get(var, 0.0))
 
@@ -364,10 +374,7 @@ class LinearSistem:
             #  => A * X = B, con B = -_const.
             A.append(rowA)
             B.append(-left_dict["_const"])
-
-        # Creamos la Matrix(A) y Vector(B) en tu librería
-        from .mmatrix import Matrix
-        from .vvector import Vector
+        
         matA = Matrix(A)
         vecB = Vector(B)
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Union, Optional, Dict, List
 
-from ..alg_types import Algebraic, T_Scalar
+from ..algebraic_core import Algebraic, ScalarLike
 
 from .symbolic_operator import SymPrintable
 from .symbol import Symbol
@@ -18,12 +18,12 @@ class Term(SymPrintable):
     """
     __slots__ = ("coefficient", "symbols_exponents")
     
-    def __init__(self, coefficient: Union[Algebraic, T_Scalar], 
-                 symbols_exponents: Optional[Dict[Symbol, T_Scalar]] = None):
+    def __init__(self, coefficient: Union[Algebraic, ScalarLike], 
+                 symbols_exponents: Optional[Dict[Symbol, ScalarLike]] = None):
         if symbols_exponents is None:
             symbols_exponents = {}
-        if isinstance(coefficient, T_Scalar):
-            from ..sscalar import Scalar
+        if isinstance(coefficient, ScalarLike):
+            from ..scalar import Scalar
             coefficient = Scalar(coefficient)
 
         self.coefficient = coefficient

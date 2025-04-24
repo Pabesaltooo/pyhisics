@@ -1,31 +1,52 @@
-from dataclasses import dataclass
-from typing import Union
+from __future__ import annotations
+from typing import Union, overload, TYPE_CHECKING
 
-from ..linalg import Matrix, T_Matrix
 
-from ..units import Unit
-from .utils_quantity import process_unit_and_value
-from .quantity_quantity import Quantity
-from .scalar_quantity import ScalarQuantity
+from ..linalg import ScalarLike, Scalar, Vector, Matrix, Algebraic
+from .core_quantity import Quantity, QOPERABLE, T_, QMultiplyable, QAddable
 
-@dataclass(frozen=True, slots=True)
-class MatrixQuantity(Quantity):
+if TYPE_CHECKING:
+    from .scalar_quantity import ScalarQuantity
+    from .vector_quantity import VectorQuantity
+
+class MatrixQuantity(Quantity[Matrix]):
     """
     Representa una magnitud matricial: Matrix + unidad (fundamental o compuesta).
     Todas las entradas de la matriz comparten la misma unidad.
     """
-    _value: Matrix
     
-    @property
-    def value(self) -> Matrix:
-        return self._value
-
-    def __init__(self, value: Union[Matrix, T_Matrix], unit: Union[str, Unit] = '1') -> None:
-        new_val, new_unit = process_unit_and_value(value, unit)
-        if not isinstance(new_val, Matrix):
-            raise TypeError("El valor debe ser de tipo Matrix o convertible a Matrix.")
-        object.__setattr__(self, "_value", new_val)
-        object.__setattr__(self, "_units", new_unit)
+    def __eq__(self, other: object) -> bool:
+        return self.value.__eq__(other)
+ 
+    @overload
+    def __mul__(self, other: Union[ScalarLike, Scalar, ScalarQuantity]) -> MatrixQuantity: ...
+    @overload
+    def __mul__(self, other: Union[Vector, VectorQuantity]) -> VectorQuantity: ...
+    @overload
+    def __mul__(self, other: Union[Matrix, MatrixQuantity]) -> MatrixQuantity: ...
+    
+    def __mul__(self, other: Union[QOPERABLE[T_], QMultiplyable[T_]]):
+        if isinstance(other, Union[ScalarLike, Algebraic]):
+            result = self.value * other
+            return type(Quantity)(result, self.units)
+        return type(Quantity)(self.value*other.value, self.units*other.units)
+    
+    def __rmul__(self, other: Union[Scalar, ScalarLike]) -> MatrixQuantity:
+        if isinstance(other, ScalarLike):
+            result = self.value * other
+            return MatrixQuantity(result, self.units)
+        return NotImplemented
+        
+    def __add__(self, other: QAddable[Matrix]) -> MatrixQuantity:
+        if self.units == other.units:
+            return MatrixQuantity(self.value + other.value, self.units)
+        raise ValueError("Unidades no compatibles en la suma")    
+    
+    def __neg__(self) -> MatrixQuantity:
+        return MatrixQuantity(-self.value, self.units)
+    
+    def __sub__(self, other: QAddable[Matrix]) -> MatrixQuantity:
+        return self + (-other)
 
     def transpose(self) -> 'MatrixQuantity':
         """
@@ -41,14 +62,3 @@ class MatrixQuantity(Quantity):
         det = self.value.det()
         # Se asume que la unidad se comporta de manera exponencial según el tamaño de la matriz.
         return ScalarQuantity(det, self.units ** self.value.shape[0])
-
-    def __str__(self) -> str:
-        return f"{self.value} ({self.units})"
-        
-    def __repr__(self) -> str:
-        try:
-            get_ipython() # type: ignore
-            self.display_latex()
-            return ''
-        except NameError:
-            return f"MatrixQuantity(matrix={self.value}, unit={self.units})"

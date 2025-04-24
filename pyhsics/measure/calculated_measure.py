@@ -82,7 +82,7 @@ class CalculatedMeasure(MeasureBaseClass):
         return str(dm)
 
     def _latex(self) -> str:
-        formula_latex = self.formula._repr_latex_().replace('$', '')
+        formula_latex = self.formula._repr_latex_().replace('$', '') # type: ignore
         if self.name:
             formula_latex = self.name + '\\;=\\;' + formula_latex
         dm = self.as_direct_measure()

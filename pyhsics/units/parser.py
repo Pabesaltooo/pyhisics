@@ -5,10 +5,9 @@ Provee la conversión de cadenas de texto en objetos de unidades a través de pr
 """
 
 from typing import Optional, Dict, Any, Callable, Union
-from ..linalg import T_Scalar
 
 from .fundamental_unit import FundamentalUnit
-from .basic_typing import UnitDict
+from .basic_typing import UnitDict, RealLike
 from .prefixed_unit import PrefixedUnit
 from .alias_manager import UnitAliasManager
 
@@ -266,7 +265,7 @@ class UnitParser:
                 raise UnitParseError("Número inválido.")
         raise UnitParseError(f"Token inesperado {self.current_token}")
 
-    def exponent(self) -> T_Scalar:
+    def exponent(self) -> RealLike:
         sign = 1
         if self.current_token.type == UnitToken.OP and self.current_token.value in ['+', '-']:
             if self.current_token.value == '-':

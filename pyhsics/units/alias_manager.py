@@ -6,7 +6,7 @@ class UnitAliasManager:
     """
     Maneja los alias para composiciones de unidades.
     """
-    _aliases: Dict[FrozenSet[tuple[FundamentalUnit, T_Scalar]], List[str]] = {}
+    _aliases: Dict[FrozenSet[tuple[FundamentalUnit, RealLike]], List[str]] = {}
     
     def __getitem__(self, key: str) -> UnitDict:
         """
@@ -15,7 +15,7 @@ class UnitAliasManager:
         return self.get_units_dict(key)
     
     @classmethod
-    def get_alias(cls, unit_set: FrozenSet[Tuple[FundamentalUnit, T_Scalar]]) -> Union[str, None]:
+    def get_alias(cls, unit_set: FrozenSet[Tuple[FundamentalUnit, RealLike]]) -> Union[str, None]:
         """
         Devuelve el primer alias asociado a la composición representada por unit_set, si existe.
         """
@@ -63,7 +63,7 @@ class UnitAliasManager:
         raise KeyError(f"Unidad desconocida: {unit}. Prueba a añadirla con add_alias.")
     
     @classmethod
-    def aliases(cls) -> Dict[FrozenSet[Tuple[FundamentalUnit, T_Scalar]], List[str]]:
+    def aliases(cls) -> Dict[FrozenSet[Tuple[FundamentalUnit, RealLike]], List[str]]:
         """
         Devuelve el diccionario interno de alias.
         """

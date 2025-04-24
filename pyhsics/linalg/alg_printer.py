@@ -2,26 +2,26 @@ from dataclasses import dataclass
 from typing import Optional, Tuple
 from math import floor, log10
 
-from .alg_types import Vector, Scalar, Matrix, Poly, T_Scalar
+from ..linalg import Vector, Scalar, Matrix, ScalarLike
+from .algebraic_core import round_T_Scalar
 
 from .symbolic_math.symbolic_operator import SymPrintable
 
 
-def _normalice_scalar(scalar: T_Scalar) -> Tuple[T_Scalar, int]:
+def _normalice_scalar(scalar: ScalarLike) -> Tuple[ScalarLike, int]:
     """Dado un valor numérico, devuelve una tupla (valor_normalizado, exponente).
     Cada subclase debe definir cómo normaliza su valor."""
-    from .alg_types import T_Scalar        
-    if not isinstance(scalar, T_Scalar): # type: ignore
+    if not isinstance(scalar, ScalarLike): # type: ignore
         return (scalar, 1)
     if scalar == 0:
         return (0, 0)
     exponent = floor(log10(abs(scalar)))
     factor: int = 10 ** exponent
     value_norm = scalar / factor
-    if isinstance(scalar, float) and value_norm.is_integer():
+    if isinstance(scalar, float) and not isinstance(value_norm, complex) and value_norm.is_integer():
         value_norm = int(value_norm)
     else:
-        value_norm = round(value_norm, 4)
+        value_norm = round_T_Scalar(value_norm, 4)
     return (value_norm, exponent)
 
 @dataclass
@@ -35,13 +35,13 @@ class LatexFormatter:
         return sym.latex()
     
     @classmethod
-    def format_individual(cls, vec: Vector, v: float) -> str:
+    def format_individual(cls, vec: Vector, v: ScalarLike) -> str:
         if isinstance(v, SymPrintable):
             return cls.sym(v)
         if v == 0:
             return '0'
         elif 0.001 <= abs(v) < 10000:
-            r_v = round(v, 4)
+            r_v = round_T_Scalar(v, 4)
             return str(int(r_v)) if float(r_v).is_integer() else str(r_v)
         else:
             norm, exp = _normalice_scalar(v)
@@ -145,6 +145,7 @@ class LatexFormatter:
             matrix_latex = make_matrix(rows_components)
             return f'${matrix_latex}$'
 
+"""
     @classmethod
     def poly(cls, poly: Poly, name: Optional[str]=None) -> str:
         # Caso especial: si es un polinomio de grado 0, se muestra como escalar.
@@ -168,3 +169,5 @@ class LatexFormatter:
                 poly_latex += f"{Scalar(v).latex()}x^{{{i}}}"
 
         return f'${poly_latex}$'
+    
+"""
