@@ -8,4 +8,5 @@ setup(
         # 'numpy',  # Ejemplo de dependencia
     ],
     test_suite='tests',  # Especificar dónde están los tests
+    author='Pablo Cabeza',
 )
