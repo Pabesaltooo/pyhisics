@@ -6,36 +6,10 @@ Provee la conversión de cadenas de texto en objetos de unidades a través de pr
 from typing import Optional, Dict, Any, Callable, Union
 from math import pi
 
-from .fundamental_unit import FundamentalUnit
+from .fundamental_unit import FundamentalUnit, PREFIXES_MAP
 from .basic_typing import UnitDict, RealLike
 from .prefixed_unit import PrefixedUnit
 from .alias_manager import UnitAliasManager
-
-# Diccionario de prefijos SI (clave: prefijo, valor: factor numérico)
-PREFIXES_MAP: Dict[str, float] = {
-    "Y": 1e24,
-    "Z": 1e21,
-    "E": 1e18,
-    "P": 1e15,
-    "T": 1e12,
-    "G": 1e9,
-    "M": 1e6,  # Mega
-    "k": 1e3,
-    "h": 1e2,
-    "da": 1e1,
-    "d": 1e-1,
-    "c": 1e-2,
-    "m": 1e-3,
-    "µ": 1e-6,
-    "u": 1e-6,  # Alternativa para micro
-    "n": 1e-9,
-    "p": 1e-12,
-    "f": 1e-15,
-    "a": 1e-18,
-    "z": 1e-21,
-    "y": 1e-24,
-}
-
 
 NOT_SI_UNITS: Dict[str, PrefixedUnit] = {
     "ºC":   PrefixedUnit(1,         {FundamentalUnit.TEMPERATURE: 1}),  # Celsius
@@ -50,11 +24,12 @@ NOT_SI_UNITS: Dict[str, PrefixedUnit] = {
     "g":    PrefixedUnit(1e-3,      {FundamentalUnit.MASS: 1}),
     "ton":  PrefixedUnit(1e3,       {FundamentalUnit.MASS: 1}),
     "L":    PrefixedUnit(0.001,     {FundamentalUnit.DISTANCE: 3}),
+    "€":    PrefixedUnit(1,         {FundamentalUnit.MONEY: 1}),
     
     "atm":  PrefixedUnit(101325,          UnitAliasManager.get_units_dict('Pa')),
     "bar":  PrefixedUnit(1e5,             UnitAliasManager.get_units_dict('Pa')), 
     "eV":   PrefixedUnit(1.60217662e-19,  UnitAliasManager.get_units_dict('J')),
-    "cal": PrefixedUnit(4.18,             UnitAliasManager.get_units_dict('J'))
+    "cal": PrefixedUnit(4.18,             UnitAliasManager.get_units_dict('J')),
 }
 
 applications = ['sqrt', 'log', 'exp', 'sin', 'cos']

@@ -67,11 +67,12 @@ class Vector(
     
     # ---------------- representación --------------------------------------
     def __str__(self) -> str:
-        return "(" + ", ".join(str(x) for x in self._value) + ")"
-
+        from ..printing.printer_alg import LinAlgTextFormatter
+        return LinAlgTextFormatter.vector_str(self)
+    
     def _repr_latex_(self, name: Optional[str] = None) -> str:
-        from .alg_printer import LatexFormatter
-        return LatexFormatter.vector(self, name)
+        from ..printing.printer_alg import LinAlgTextFormatter
+        return LinAlgTextFormatter.vector_latex(self, name)
     
     # ------------- suma ---------------------------------------------------
     def __add__(self, other: Addable[VectorLike]) -> Vector:

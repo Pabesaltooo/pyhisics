@@ -40,11 +40,12 @@ class Scalar(
 
     # ------------- representación -------------------------------------
     def __str__(self) -> str:            # str(s)
-        return str(self._value)
-
+        from ..printing.printer_alg import LinAlgTextFormatter
+        return LinAlgTextFormatter.scalar_str(self.value)
+    
     def _repr_latex_(self, name: Optional[str] = None) -> str:  # Jupyter
-        from .alg_printer import LatexFormatter
-        return LatexFormatter.scalar(self, name)
+        from ..printing.printer_alg import LinAlgTextFormatter
+        return LinAlgTextFormatter.scalar_latex(self.value, name)
 
     # ------------- helpers de Algebraic -------------------------------
     def is_zero(self) -> bool:

@@ -81,6 +81,13 @@ henrry = UnitComposition({
     FundamentalUnit.DISTANCE: 2,
     FundamentalUnit.ELECTRIC_CURRENT: -2})
 
+ohm_m = UnitComposition({
+    FundamentalUnit.MASS: 1,
+    FundamentalUnit.DISTANCE: 3,
+    FundamentalUnit.TIME: -3,
+    FundamentalUnit.ELECTRIC_CURRENT: -2
+    })
+
 def add_derived_units_to_alias_manager():
     # Al iniciar el modulo
     # Registrar las unidades derivadas en el gestor de alias
@@ -98,3 +105,5 @@ def add_derived_units_to_alias_manager():
     UnitAliasManager.add_alias(farad.unit_dict, "F")    # Faradio
     UnitAliasManager.add_alias(webber.unit_dict, "Wb")  # Webber
     UnitAliasManager.add_alias(henrry.unit_dict, "H")
+    
+    UnitAliasManager.add_alias(ohm_m.unit_dict, "Ωm")

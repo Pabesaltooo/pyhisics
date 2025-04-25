@@ -65,12 +65,12 @@ class UnitComposition(Printable):
         return UnitComposition({unit: power for unit, power in self.unit_dict.items() if power != 0})
 
     def __str__(self) -> str:
-        from .unit_printer import UnitPrinter
-        return UnitPrinter.py_str(self.unit_dict) # devuelve una str de python con los * como · y los exponentes como superindices
+        from ..printing.printer_unit import UnitTextFormater
+        return UnitTextFormater.py_str(self.unit_dict) # devuelve una str de python con los * como · y los exponentes como superindices
 
     def _repr_latex_(self): # devuelve una string en formato laTex
-        from .unit_printer import UnitPrinter
-        return "$" + UnitPrinter.latex_str(self.unit_dict) + "$" 
+        from ..printing.printer_unit import UnitTextFormater
+        return "$" + UnitTextFormater.latex_str(self.unit_dict) + "$" 
         
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, UnitComposition):

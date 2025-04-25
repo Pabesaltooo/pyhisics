@@ -88,8 +88,8 @@ class Unit(Printable):
         return base if self.prefix == 1.0 else f'{self.prefix} {base}'
 
     def _repr_latex_(self): # devuelve una string en formato laTex
-        from .unit_printer import UnitPrinter
-        return "$" + UnitPrinter.latex_str(self.composition.unit_dict) + "$" 
+        from ..printing.printer_unit import UnitTextFormater
+        return "$" + UnitTextFormater.latex_str(self.composition.unit_dict) + "$" 
     
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Unit):

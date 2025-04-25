@@ -224,7 +224,7 @@ class Matrix(
         return MatrixMethods.reduced_row_echelon_form(self)
 
     # ---------------- representación -------------------------------------
-    def __str__(self) -> str:
+    def __2str__(self) -> str:
         col_widths = [
             max(len(str(self.value[i][j])) 
                 for i in range(len(self.value))) 
@@ -235,11 +235,15 @@ class Matrix(
                             for j in range(len(self.value[0]))) + ']'
             for i in range(len(self.value))
         )    
-        return matrix_str  
+        return matrix_str 
+    
+    def __str__(self) -> str:
+        from ..printing.printer_alg import LinAlgTextFormatter
+        return LinAlgTextFormatter.matrix_str(self)          
     
     def _repr_latex_(self, name: Optional[str] = None) -> str:
-        from .alg_printer import LatexFormatter
-        return LatexFormatter.matrix(self, name)    
+        from ..printing.printer_alg import LinAlgTextFormatter
+        return LinAlgTextFormatter.matrix_latex(self)   
     
     # ------------- suma ---------------------------------------------------
     @overload
@@ -365,8 +369,8 @@ class Matrix(
         n, m = self.shape
         if n != m:
             raise ValueError("Sólo definido para matrices cuadradas.")
-        # Inicializamos P = I_n
-        P = [[1 if i == j else 0 for j in range(n)] for i in range(n)]
+        # Inicializamos P = I_n as floats to allow arithmetic with float or complex values
+        P: MatrixLike = [[1.0 if i == j else 0.0 for j in range(n)] for i in range(n)]
 
         for i in range(n):
             # Si el pivote es cero, saltamos (o podrías buscar otro no nulo)
