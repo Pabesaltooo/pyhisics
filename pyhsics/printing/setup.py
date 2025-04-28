@@ -1,12 +1,13 @@
 # ~/.ipython/profile_default/startup/00-latex_collections.py
 
-from typing import Literal
+from typing import Literal, Sequence, Any
 from IPython import get_ipython
 from .printer_alg import LinAlgTextFormatter, PrintingMode
+from .printable import Printable
 
 ip = get_ipython()
 
-def seq_to_latex(seq, left_delim, right_delim):
+def seq_to_latex(seq: Sequence[Printable | Any], left_delim: str, right_delim: str):
     # 1) SOLO si hay al menos un elem. con _repr_latex_
     if not any(hasattr(item, '_repr_latex_') for item in seq):
         return None
@@ -18,8 +19,8 @@ def seq_to_latex(seq, left_delim, right_delim):
             continue
 
         # Caso Printable
-        if hasattr(item, '_repr_latex_'):
-            latex = item._repr_latex_().strip('$')
+        if hasattr(item, 'latex'):
+            latex = item.latex()
 
         # Números
         elif isinstance(item, (int, float, complex)):
@@ -40,7 +41,7 @@ def seq_to_latex(seq, left_delim, right_delim):
     if not parts:
         return None
 
-    body = ',\\;'.join(parts)
+    body = ',\\quad'.join(parts)
     return f"${left_delim}{body}{right_delim}$"
 
 
