@@ -4,6 +4,7 @@ Pyhsics: Una librería para cálculos físicos, manejo de unidades, geometría y
 Provee clases para trabajar con unidades, cantidades físicas y operaciones geométricas.
 """
 from .printing import setup
+from .printing.setup import set_printing_mode
 from .linalg import (Scalar, 
                      Vector, Matrix, 
                      LinearSistem)

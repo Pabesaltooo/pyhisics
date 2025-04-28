@@ -1,6 +1,8 @@
 # ~/.ipython/profile_default/startup/00-latex_collections.py
 
+from typing import Literal
 from IPython import get_ipython
+from .printer_alg import LinAlgTextFormatter, PrintingMode
 
 ip = get_ipython()
 
@@ -57,3 +59,11 @@ fmt = ip.display_formatter.formatters['text/latex']
 fmt.for_type(tuple, tuple_to_latex)
 fmt.for_type(list,  list_to_latex)
 fmt.for_type(set,   set_to_latex)
+
+def set_printing_mode(mode: Literal['Math', 'Physics']) -> None:
+    if mode == 'Math': 
+        LinAlgTextFormatter.set_printing_mode(PrintingMode.MATH)
+    elif mode == 'Physics':
+        LinAlgTextFormatter.set_printing_mode(PrintingMode.PHYSICS)
+    else:
+        raise ValueError(f'{mode} is not a valid argument. Use Literal["Math", "Physics"]')
