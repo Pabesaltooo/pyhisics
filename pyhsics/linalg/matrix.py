@@ -11,7 +11,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import (
     Iterable, Iterator, List, Optional, Tuple, Union,
     overload, TYPE_CHECKING
@@ -27,6 +26,7 @@ from .algebraic_core import (
 if TYPE_CHECKING:                          # sólo para el type‑checker
     from .scalar import Scalar
     from .vector import Vector
+    from .point import Point
 
 
 # -------------------------------------------------------------------------
@@ -100,7 +100,6 @@ class _MatrixCore(Algebraic[MatrixLike]):
 # -------------------------------------------------------------------------
 # 3  Helppers de Operaciones Matriciales ----------------------------------
 # -------------------------------------------------------------------------
-@dataclass 
 class MatrixMethods:   
     @classmethod
     def det(cls, A: Matrix) -> Scalar:
@@ -254,7 +253,7 @@ class Matrix(
             raise NotImplemented
         if not _same_shape(self._value, other._value):
             raise ValueError("Las matrices deben tener la misma forma para sumarse.")
-        return Matrix(AlgebraicOps.add_matrix(self._value, other._value))
+        return Matrix(AlgebraicOps.add_matrix_like(self._value, other._value))
 
     def __neg__(self) -> Matrix:
         return Matrix([[-x for x in row] for row in self._value])
@@ -268,25 +267,28 @@ class Matrix(
     @overload
     def __mul__(self, other: Vector)   -> Vector: ...
     @overload
+    def __mul__(self, other: Point)   -> Point: ...
+    @overload
     def __mul__(self, other: Matrix)   -> Matrix: ...
 
     def __mul__(self, other):                           # type: ignore[override]
         from .scalar import Scalar
         from .vector import Vector
+        from .point import Point
 
-        # --- caso escalar literal ----------------------------------------
+        # --- caso escalar literal --------------------------------------------
         if isinstance(other, ScalarLike):
             other = Scalar(other)
 
-        # --- dispatch -----------------------------------------------------
+        # --- dispatch --------------------------------------------------------
         if isinstance(other, Scalar):
-            return Matrix(AlgebraicOps.mul_matrix_scalar(self._value, other.value))
-
+            return Matrix(AlgebraicOps.mul_matrix_scalar_like(self._value, other.value))
         if isinstance(other, Vector):
-            return Vector(AlgebraicOps.mat_vec(self._value, other.value))
-
+            return Vector(AlgebraicOps.mul_mat_vec_like(self._value, other.value))
+        if isinstance(other, Point):
+            return Point(AlgebraicOps.mul_mat_vec_like(self._value, other.value))
         if isinstance(other, Matrix):
-            return Matrix(AlgebraicOps.mat_mat(self._value, other._value))
+            return Matrix(AlgebraicOps.mul_mat_mat_like(self._value, other._value))
 
         return NotImplemented
 
@@ -306,7 +308,7 @@ class Matrix(
             other = Scalar(other)
         if not isinstance(other, Scalar):
             raise TypeError("Una matriz sólo se puede dividir por un escalar.")
-        return Matrix(AlgebraicOps.div_matrix_scalar(self._value, other.value))
+        return Matrix(AlgebraicOps.div_matrix_scalar_like(self._value, other.value))
 
     # (no hay __rtruediv__)
     
@@ -470,8 +472,16 @@ class Matrix(
 
     @classmethod
     def from_vecs(cls, vecs: Iterable[Vector]) -> Matrix:
-        return cls([v.value for v in vecs]).T
-    
+        """Sets imput vectors in the cols of the matrix"""
+        vec_list = list(vecs)
+        if not vec_list:
+            raise ValueError("Debe proporcionar al menos un vector.")
+        n = len(vec_list[0])
+        if any(len(vec) != n for vec in vec_list):
+            raise ValueError("Todos los vectores deben tener la misma longitud.")
+        rows = [[vec[i] for vec in vec_list] for i in range(n)]
+        return cls(rows)
+
     def hstack(self, other: Union[Matrix, Vector]) -> Matrix:
         """Apila horizontalmente (a la drecha) dos matrices."""
         from .vector import Vector

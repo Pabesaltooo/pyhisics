@@ -1,7 +1,6 @@
 from math import floor, log10
 from typing import Any, List, Optional, Tuple
 from enum import Enum
-
 from ..linalg import Vector, Matrix, Scalar, ScalarLike
 from ..linalg.algebraic_core import round_T_Scalar
 from .helpers import to_superscript
@@ -63,7 +62,7 @@ def _matrix_body(rows: List[List[str]], latex: bool = True) -> str:
     """
     if latex:
         lines = [" & ".join(r) for r in rows]
-        return r"\begin{pmatrix}" + " \\ ".join(lines) + r"\end{pmatrix}"
+        return r"\begin{pmatrix}" + " \\\\ ".join(lines) + r"\end{pmatrix}"
     return ""
 
 class LinAlgTextFormatter:

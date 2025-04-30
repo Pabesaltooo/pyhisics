@@ -4,6 +4,7 @@ from typing import Union
 from .scalar import Scalar
 from .vector import Vector
 from .matrix import Matrix
+from .point  import Point
 from .linear_sistem import LinearSistem
 from .algebraic_core import ScalarLike, VectorLike, MatrixLike, Algebraic, T2Algebraic
 
@@ -18,6 +19,7 @@ ALG = Union[Scalar, Vector, Matrix]
 __all__ = [
     'Scalar',
     'Vector',
+    'Point',
     'Matrix',
     
     'LinearSistem',
@@ -26,10 +28,3 @@ __all__ = [
     'AlgLike',
     'Algebraic'
 ]
-"""    
-    'Symbol', 
-    'symbols', 
-    'Term', 
-    'Expression',
-    'Pow'
-]"""

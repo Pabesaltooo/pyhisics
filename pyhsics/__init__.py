@@ -5,7 +5,7 @@ Provee clases para trabajar con unidades, cantidades físicas y operaciones geom
 """
 from .printing import setup
 from .printing.setup import set_printing_mode
-from .linalg import (Scalar, 
+from .linalg import (Scalar, Point,
                      Vector, Matrix, 
                      LinearSistem)
 #                     Symbol, symbols, Term, Expression)
@@ -18,6 +18,7 @@ from .plotter import Plotter, MultiPlotter
 __all__ = [
     'Scalar',
     'Vector',
+    'Point',
     'Matrix',
 
     'LinearSistem',

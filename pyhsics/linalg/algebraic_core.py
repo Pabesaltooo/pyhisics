@@ -139,45 +139,45 @@ class AlgebraicOps:
 
     # --- Suma ---------------------------------------------------------------
     @staticmethod
-    def add_scalar(a: ScalarLike, b: ScalarLike) -> ScalarLike:
+    def add_scalar_like(a: ScalarLike, b: ScalarLike) -> ScalarLike:
         return a + b
 
     @staticmethod
-    def add_vector(a: VectorLike, b: VectorLike) -> VectorLike:
+    def add_vector_like(a: VectorLike, b: VectorLike) -> VectorLike:
         _validate_same_len(a, b)
         return [x + y for x, y in zip(a, b)]
 
     @staticmethod
-    def add_matrix(a: MatrixLike, b: MatrixLike) -> MatrixLike:
+    def add_matrix_like(a: MatrixLike, b: MatrixLike) -> MatrixLike:
         _validate_same_dim(a, b)
         return [[x + y for x, y in zip(ra, rb)] for ra, rb in zip(a, b)]
 
     # --- Producto -----------------------------------------------------------
     @staticmethod
-    def mul_scalar(a: ScalarLike, b: ScalarLike) -> ScalarLike:
+    def mul_scalar_like(a: ScalarLike, b: ScalarLike) -> ScalarLike:
         return a * b
 
     @staticmethod
-    def mul_vector_scalar(v: VectorLike, k: ScalarLike) -> VectorLike:
+    def mul_vector_scalar_like(v: VectorLike, k: ScalarLike) -> VectorLike:
         return [x * k for x in v]
 
     @staticmethod
-    def mul_matrix_scalar(M: MatrixLike, k: ScalarLike) -> MatrixLike:
+    def mul_matrix_scalar_like(M: MatrixLike, k: ScalarLike) -> MatrixLike:
         return [[x * k for x in row] for row in M]
 
     @staticmethod
-    def dot(a: VectorLike, b: VectorLike) -> ScalarLike:
+    def st_dot(a: VectorLike, b: VectorLike) -> ScalarLike:
         _validate_same_len(a, b)
         return sum(x * y for x, y in zip(a, b))
 
     @staticmethod
-    def mat_vec(M: MatrixLike, v: VectorLike) -> VectorLike:
+    def mul_mat_vec_like(M: MatrixLike, v: VectorLike) -> VectorLike:
         if len(M[0]) != len(v):
-            raise ValueError("Dimensiones incompatibles MxN · N")
+            raise ValueError("Dimensiones incompatibles m x n · n")
         return [sum(x * y for x, y in zip(row, v)) for row in M]
 
     @staticmethod
-    def mat_mat(A: MatrixLike, B: MatrixLike) -> MatrixLike:
+    def mul_mat_mat_like(A: MatrixLike, B: MatrixLike) -> MatrixLike:
         if len(A[0]) != len(B):
             raise ValueError("Dimensiones incompatibles")
         Bt: list[list[ScalarLike]] = [list(row) for row in zip(*B)]  # traspuesta para cache lineal
@@ -185,15 +185,15 @@ class AlgebraicOps:
 
     # --- División nueva ---------------------------------------------
     @staticmethod
-    def div_scalar(a: ScalarLike, b: ScalarLike) -> ScalarLike:
+    def div_scalar_like(a: ScalarLike, b: ScalarLike) -> ScalarLike:
         return a / b
 
     @staticmethod
-    def div_vector_scalar(v: VectorLike, k: ScalarLike) -> VectorLike:
+    def div_vector_scalar_like(v: VectorLike, k: ScalarLike) -> VectorLike:
         return [x / k for x in v]
 
     @staticmethod
-    def div_matrix_scalar(M: MatrixLike, k: ScalarLike) -> MatrixLike:
+    def div_matrix_scalar_like(M: MatrixLike, k: ScalarLike) -> MatrixLike:
         return [[x / k for x in row] for row in M]
 
 # ---------------------------------------------------------------------------

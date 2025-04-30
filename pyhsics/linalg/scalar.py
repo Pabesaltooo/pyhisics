@@ -58,7 +58,7 @@ class Scalar(
     def __add__(self, other: Addable[ScalarLike])      -> Scalar:
         if not isinstance(other, Scalar):
             other = Scalar(other.value)          # cumple Protocol Addable
-        return Scalar(AlgebraicOps.add_scalar(self._value, other._value))
+        return Scalar(AlgebraicOps.add_scalar_like(self._value, other._value))
 
     def __neg__(self) -> Scalar:
         return Scalar(-self._value)
@@ -79,11 +79,11 @@ class Scalar(
         if isinstance(other, ScalarLike):
             other = Scalar(other)
         if isinstance(other, Scalar):
-            return Scalar(AlgebraicOps.mul_scalar(self._value, other._value))
+            return Scalar(AlgebraicOps.mul_scalar_like(self._value, other._value))
         if isinstance(other, Vector):
-            return Vector(AlgebraicOps.mul_vector_scalar(other.value, self._value))
+            return Vector(AlgebraicOps.mul_vector_scalar_like(other.value, self._value))
         if isinstance(other, Matrix):
-            return Matrix(AlgebraicOps.mul_matrix_scalar(other.value, self._value))
+            return Matrix(AlgebraicOps.mul_matrix_scalar_like(other.value, self._value))
         else:
             return NotImplemented
 
@@ -105,7 +105,7 @@ class Scalar(
             other = Scalar(other)
         if not isinstance(other, Scalar):
             raise TypeError("Sólo se permite dividir entre escalares.")
-        return Scalar(AlgebraicOps.div_scalar(self._value, other._value))
+        return Scalar(AlgebraicOps.div_scalar_like(self._value, other._value))
     
     def __rtruediv__(self, other: ScalarLike) -> Scalar:
         return Scalar(other / self._value)
