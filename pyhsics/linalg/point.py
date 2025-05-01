@@ -54,14 +54,14 @@ class Point(VectorCore, Addable[VectorLike], Multiplyable[VectorLike]):
         return self * other
 
     @overload
-    def __add__(self, other: Point) -> Vector: ...
+    def __add__(self, other: Point) -> Point: ...
     @overload
     def __add__(self, other: Vector) -> Point: ...
     
     def __add__(self, other: Addable[VectorLike]):
         from .vector import Vector
         if isinstance(other, Point):
-            return Vector(AlgebraicOps.add_vector_like((-self)._value, other.value))
+            return Point(AlgebraicOps.add_vector_like(self._value, other.value))
         if isinstance(other, Vector):
             return Point(AlgebraicOps.add_vector_like(self._value, other.value))
         raise NotImplementedError
@@ -71,7 +71,7 @@ class Point(VectorCore, Addable[VectorLike], Multiplyable[VectorLike]):
 
     def __sub__(self, other: Addable[VectorLike]) -> Vector:
         from .vector import Vector
-        return Vector(AlgebraicOps.add_vector_like(other.value, (-self)._value))
+        return Vector(AlgebraicOps.add_vector_like((-other).value, self._value))
 
     def __round__(self, ndigits: int = 2) -> Point:
         return Point(round_T_Scalar(v, ndigits) for v in self)

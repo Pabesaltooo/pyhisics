@@ -76,13 +76,27 @@ class Vector(
         return LinAlgTextFormatter.vector_latex(self, name)
     
     # ------------- suma ---------------------------------------------------
-    def __add__(self, other: Addable[VectorLike]) -> Vector:
-        if not isinstance(other, Vector):
-            return NotImplemented
-        return Vector(AlgebraicOps.add_vector_like(self._value, other._value))
+    @overload
+    def __add__(self, other: Point) -> Point:   ...
+    @overload
+    def __add__(self, other: Vector) -> Vector: ...
     
-    def __sub__(self, other: Addable[VectorLike]) -> Vector:
-        return Vector((self + (-other)).value)
+    def __add__(self, other):
+        from .point import Point
+        if not isinstance(other, VectorCore):
+            return NotImplemented
+        if isinstance(other, Vector):
+            return Vector(AlgebraicOps.add_vector_like(self._value, other._value))
+        if isinstance(other, Point):
+            return Point(AlgebraicOps.add_vector_like(self._value, other._value))
+
+    @overload
+    def __sub__(self, other: Point) -> Point:   ...
+    @overload
+    def __sub__(self, other: Vector) -> Vector: ...
+    
+    def __sub__(self, other):
+        return self + (- other)
 
     def __neg__(self) -> Vector:
         return Vector([-x for x in self._value])

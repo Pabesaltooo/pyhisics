@@ -152,8 +152,8 @@ class MatrixMethods:
         Retorna una nueva matriz (no muta A).
         """
         # 1) Copiar la matriz original para trabajar sobre la copia
-        B = [fila[:] for fila in A.value]
-
+        B = [fila[:] for fila in A._augmented_matrix_I().value]
+        
         n = len(B)
         m = len(B[0]) if n > 0 else 0
 
