@@ -11,6 +11,7 @@ from .linalg import (Scalar, Point,
 #                     Symbol, symbols, Term, Expression)
 from .units import Unit, UnitAliasManager
 from .quantity import ScalarQuantity, VectorQuantity, Quantity, Constants
+from .funcs import *
 from .measure import DirectMeasure, CalculatedMeasure
 from .plotter import Plotter, MultiPlotter
 
@@ -30,6 +31,9 @@ __all__ = [
     'ScalarQuantity',
     'VectorQuantity',
     'Constants',
+    
+    "sin", "cos", "tan", "asin", "acos", "atan",
+    "sqrt", "log", "log10", "exp",
     
     'DirectMeasure',
     'CalculatedMeasure',

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import ABC
 from typing import (
-    Any, Generic, Protocol, TypeVar, Union, runtime_checkable,
+    Any, Generic, Optional, Protocol, TypeVar, Union, runtime_checkable,
     TYPE_CHECKING, overload, TypeAlias, Tuple, cast
 )
 
@@ -119,7 +119,7 @@ class Quantity(QAddable[T], QMultiplyable[T], Printable, ABC, Generic[T]):
     def __str__(self) -> str:
         return f"{self.value} {self.units}"
 
-    def _repr_latex_(self) -> str:
+    def _repr_latex_(self, name: Optional[str] = None) -> str:
         return f"${self.value.latex()}\\;{self.units.latex()}$"
 
     # ---------- Nueva -------------------------------------------------------
