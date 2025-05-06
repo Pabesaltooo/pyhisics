@@ -1,5 +1,7 @@
 # Entorno virtual
 .venv/
+.env
+Fisica.code-workspace
 
 # Archivos de caché de Python
 __pycache__/
