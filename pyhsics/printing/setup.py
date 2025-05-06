@@ -55,11 +55,12 @@ def set_to_latex(st):
     # Ordenamos por repr para salida consistente
     return seq_to_latex(sorted(st, key=lambda x: repr(x)), r"\left\{", r"\right\}")
 
-# Registrar formateadores LaTeX
-fmt = ip.display_formatter.formatters['text/latex']
-fmt.for_type(tuple, tuple_to_latex)
-fmt.for_type(list,  list_to_latex)
-fmt.for_type(set,   set_to_latex)
+if ip:
+    # Registrar formateadores LaTeX
+    fmt = ip.display_formatter.formatters['text/latex']
+    fmt.for_type(tuple, tuple_to_latex)
+    fmt.for_type(list,  list_to_latex)
+    fmt.for_type(set,   set_to_latex)
 
 def set_printing_mode(mode: Literal['Math', 'Physics']) -> None:
     if mode == 'Math': 

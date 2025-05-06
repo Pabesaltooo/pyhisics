@@ -1,4 +1,6 @@
-from pyhsics import *
+from pyhsics.linalg.bilineal_form import Form
 
-M = Matrix([[4, 7], [2, 6]])      # det = 10
-M.det()
+Form(((0,2,-2),
+      (2,1,0),
+      (-2,0,-1))
+     ).get_ortogonal_base()

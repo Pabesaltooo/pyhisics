@@ -11,7 +11,7 @@ from __future__ import annotations
 from random import random, gauss
 from typing import (
     Iterable, Iterator, List, Optional,
-    overload, TYPE_CHECKING
+    overload, TYPE_CHECKING, ClassVar
 )
 
 from .algebraic_core import (
@@ -61,6 +61,16 @@ class Vector(
     Multiplyable[VectorLike],
 ):
     """Vector fila de dimensión arbitraria."""
+    __slots__ = ()
+    
+    # Todos los vectores se multiplicaran por esta matriz al hacer el dot 
+    _dot_product_matrix: Optional[Matrix] = None
+
+    @classmethod
+    def set_dot_form(cls, A: Matrix) -> None:
+        if A.is_squared:
+            cls._dot_product_matrix = A
+
     @property
     def T(self):
         from .matrix import Matrix
@@ -149,9 +159,14 @@ class Vector(
     def dot(self, other: Vector, *, form: Optional[Matrix] = None) -> Scalar:
         """Producto punto usando forma bilineal opcional (identidad por defecto)."""
         from .scalar import Scalar
+        from .matrix import Matrix
 
         if form is None:
-            return Scalar(AlgebraicOps.st_dot(self._value, other._value))
+            if self.__class__._dot_product_matrix is None:
+                form = Matrix.eye(len(self))
+                self.__class__._dot_product_matrix = form
+            else:
+                form = self.__class__._dot_product_matrix
         
         if len(form.value) != len(self) or len(form.value[0]) != len(other):
             raise ValueError("Dimensiones incompatibles en producto bilineal")

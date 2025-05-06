@@ -242,7 +242,7 @@ class Matrix(
     
     def _repr_latex_(self, name: Optional[str] = None) -> str:
         from ..printing.printer_alg import LinAlgTextFormatter
-        return LinAlgTextFormatter.matrix_latex(self)   
+        return LinAlgTextFormatter.matrix_latex(self, name)   
     
     # ------------- suma ---------------------------------------------------
     @overload

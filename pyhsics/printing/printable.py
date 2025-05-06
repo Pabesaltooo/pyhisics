@@ -28,7 +28,7 @@ class Printable(ABC):
         pass
     
     @abstractmethod
-    def _repr_latex_(self) -> str:
+    def _repr_latex_(self, name: Optional[str] = None) -> str:
         """
         Retorna la representación del objeto en LaTeX.
         El string debe comenzar y terminar con '$'.
@@ -66,4 +66,4 @@ class Printable(ABC):
             name (Optional[str]): (Opcional) Nombre identificador para el objeto mostrado. Actualmente
                                     no influye en la representación pero se deja para posibles extensiones.
         """
-        display(Latex(self._repr_latex_()))
+        display(Latex(self._repr_latex_(name)))

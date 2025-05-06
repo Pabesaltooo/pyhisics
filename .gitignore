@@ -18,3 +18,7 @@ ARIKETAK/
 OTHERS/
 
 pyhsics/linalg/_pruebas
+
+.gitignore
+
+main_deugger.py

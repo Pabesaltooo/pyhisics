@@ -1,10 +1,5 @@
 from __future__ import annotations
-
-from random import random, gauss
-from typing import (
-    Any, Iterable, Iterator, List, Optional, Union,
-    overload, TYPE_CHECKING
-)
+from typing import overload, TYPE_CHECKING
 
 from .algebraic_core import (
      Addable, Multiplyable,
@@ -35,9 +30,9 @@ class Point(VectorCore, Addable[VectorLike], Multiplyable[VectorLike]):
     @overload
     def __mul__(self, other: ScalarLike) -> Point: ...
     @overload
-    def __mul__(self, other: Scalar) -> Point: ...
+    def __mul__(self, other: Scalar)     -> Point: ...
     @overload
-    def __mul__(self, other: Matrix) -> Point: ...
+    def __mul__(self, other: Matrix)     -> Point: ...
     
     def __mul__(self, other): # type: ignore
         from .scalar import Scalar                        
@@ -54,7 +49,7 @@ class Point(VectorCore, Addable[VectorLike], Multiplyable[VectorLike]):
         return self * other
 
     @overload
-    def __add__(self, other: Point) -> Point: ...
+    def __add__(self, other: Point)  -> Point: ...
     @overload
     def __add__(self, other: Vector) -> Point: ...
     

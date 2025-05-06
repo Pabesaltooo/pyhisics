@@ -1,5 +1,5 @@
 import sys
-from typing import List, Optional, Set, Union, Dict, Tuple
+from typing import List, Literal, Optional, Set, Union, Dict, Tuple
 import re
 from math import lcm
 
@@ -36,6 +36,8 @@ def vector_to_integer_coords(vec_float: Union[Vector,VectorLike]):
 
     return int_coords
 
+MODES = Literal['Answers','LES', 'MS', 'AM']
+
 class LinearSistem:
     """
     Representa un sistema de ecuaciones lineales de la forma A·X = B.
@@ -48,7 +50,7 @@ class LinearSistem:
         self, 
         value: Union[Matrix, MatrixLike],     # Matriz de coeficientes A
         B: Union[Vector, VectorLike],         # Vector de términos independientes B
-        repr_mode: str = "Answers"
+        repr_mode: MODES = "Answers"
     ):
         """
         Parámetros:
