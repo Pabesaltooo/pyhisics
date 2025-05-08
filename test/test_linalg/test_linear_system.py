@@ -82,7 +82,7 @@ class TestLinearSystemSolve(unittest.TestCase):
         sys.repr_mode = "LES"
         tex_les = sys._repr_latex_()
         self.assertIn(r"\begin{aligned}", tex_les)
-        self.assertIn("2x_{1}", tex_les)
+        self.assertIn("2.0x_{1}", tex_les)
 
         sys.repr_mode = "AM"
         tex_am = sys._repr_latex_()
