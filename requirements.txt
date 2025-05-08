@@ -1,6 +1,11 @@
 setuptools
 pytest
 
+# Linting
+mypy
+fluk
+
+
 sympy
 matplotlib
 pandas

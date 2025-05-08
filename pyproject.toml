@@ -1,0 +1,17 @@
+[project]
+name = "pyphysics"
+version = "0.1.0"
+description = "Librería de cálculos físicos: unidades, medidas y geometría"
+authors = [{name="Pablo Cabeza", email="tucorreo@ejemplo.com"}]
+readme = "README.md"
+license = {text = "MIT"}
+dependencies = [
+  "sympy",
+  "numpy",
+  "matplotlib",
+  "pandas",
+  "pytest"
+]
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
