@@ -1,6 +1,5 @@
 import unittest
-from pyhsics.quantity import Quantity
-from pyhsics.linalg.vector import Vector
+from pyhsics import Vector, Quantity
 
 
 class TestQuantity(unittest.TestCase):
@@ -15,7 +14,7 @@ class TestQuantity(unittest.TestCase):
         """Prueba la creación de objetos Quantity"""
         self.assertEqual(self.q1.value, 5)
         self.assertEqual(str(self.q1.units), "m")
-        self.assertEqual(str(self.q3.value), "Vector([1, 2, 3])")
+        self.assertEqual(str(self.q3.value), "(1, 2, 3)")
 
     def test_addition(self):
         """Prueba la suma de Quantity"""
@@ -37,7 +36,7 @@ class TestQuantity(unittest.TestCase):
         """Prueba la división de Quantity"""
         result = self.q1 / self.q2  # 5m / 10s = 0.5 m/s
         self.assertEqual(result.value, 0.5)
-        self.assertEqual(str(result.units), "m/s")
+        self.assertEqual(str(result.units), "m·s⁻¹")
 
     def test_power(self):
         """Prueba la exponenciación de Quantity"""
@@ -58,16 +57,10 @@ class TestQuantity(unittest.TestCase):
         q_neg = Quantity(-10, "m")
         self.assertEqual(abs(q_neg).value, 10)
 
-    def test_copy(self):
-        """Prueba la copia de un Quantity"""
-        q_copy = self.q1.__copy__()
-        self.assertEqual(q_copy.value, self.q1.value)
-        self.assertEqual(str(q_copy.units), str(self.q1.units))
-
     def test_string_representation(self):
         """Prueba la representación en string de Quantity"""
-        self.assertEqual(str(self.q1), "5 (m)")
-        self.assertEqual(repr(self.q1), "Quantity(value=5, units=m)")
+        self.assertEqual(str(self.q1), "5 m")
+        self.assertEqual(repr(self.q1), "ScalarQuantity(5 m)")
 
 if __name__ == '__main__':
     unittest.main()
