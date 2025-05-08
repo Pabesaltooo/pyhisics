@@ -1,15 +1,15 @@
 from __future__ import annotations
-from typing import Iterable, List, Union
-from .vector import Vector
-from .matrix import Matrix
-from .linear_sistem import LinearSistem
+from typing import List, Union
+from ..structures.vector import Vector
+from ..structures.matrix import Matrix
+from .linear_system import LinearSystem
 
 class Form(Matrix):
     def ker(self) -> Union[Vector,List[Vector], None]:
-        return LinearSistem(self, Vector.zeros(len(self))).solve()
+        return LinearSystem(self, Vector.zeros(len(self))).solve()
     
     def get_ortogonal_subspace(self, v: Vector) -> Union[Vector,List[Vector], None]:
-        return LinearSistem([(self*v).value],[0]).solve()
+        return LinearSystem([(self*v).value],[0]).solve()
     
     def find_non_isotropic_vector(self) -> Vector:
         n = len(self)
@@ -40,8 +40,7 @@ class Form(Matrix):
                 sub_form = Form(Matrix.from_vecs(w1_T).value)
                 return beta.union(sub_form.get_ortogonal_base())
         
-        # If w1_T is a single Vector, add it if it's orthogonal to w1.
-        elif isinstance(w1_T, Vector):
+        elif isinstance(w1_T, Vector): # type: ignore[assignment]
             if w1.dot(w1_T, form=self) == 0:
                 beta.add(w1_T)
             return beta

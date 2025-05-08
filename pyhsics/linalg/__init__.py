@@ -1,12 +1,13 @@
 from typing import Union
 
 #from .vector import Vector
-from .scalar import Scalar
-from .vector import Vector
-from .matrix import Matrix
-from .point  import Point
-from .linear_sistem import LinearSistem
-from .algebraic_core import ScalarLike, VectorLike, MatrixLike, Algebraic, T2Algebraic
+from .structures.scalar import Scalar
+from .structures.vector import Vector
+from .structures.matrix import Matrix
+from .structures.point  import Point
+from .solvers.linear_system import LinearSystem
+from .solvers.bilineal_form import Form
+from .core.algebraic_core import ScalarLike, VectorLike, MatrixLike, Algebraic, T2Algebraic
 
 """from .symbolic_math.symbol import Symbol, symbols
 from .symbolic_math.term import Term
@@ -22,7 +23,10 @@ __all__ = [
     'Point',
     'Matrix',
     
-    'LinearSistem',
+    'LinearSystem',
+    'Form',
+    
+    'T2Algebraic',
     
     'ALG',
     'AlgLike',

@@ -12,14 +12,14 @@
 from __future__ import annotations
 
 from typing import (
-    Iterable, Iterator, List, Optional, Tuple, Union,
+    Iterable, Iterator, List, Optional, Tuple, Union, Literal,
     overload, TYPE_CHECKING
 )
 from functools import cached_property
 
-from .algebraic_core import (
-    Algebraic, Addable, Multiplyable,
-    ScalarLike, MatrixLike,
+from ..core.algebraic_core import (
+    Addable, Multiplyable, 
+    Algebraic, ScalarLike, MatrixLike,
     AlgebraicOps, round_T_Scalar
 )
 
@@ -107,17 +107,17 @@ class MatrixMethods:
         from .scalar import Scalar
         if A.shape[0] != A.shape[1]:
             raise ValueError("El determinante solo está definido para matrices cuadradas.")
-        
+
         M = cls.row_echelon_form(A).value
         det = 1
         for i in range(len(M)):
             det *= M[i][i]
         return Scalar(det)
-    
+
     @classmethod      
     def transpose(cls, A: Matrix) -> Matrix:
         return Matrix([[A[j][i] for j in range(len(A))] for i in range(len(A[0]))])
-    
+
     @classmethod
     def row_echelon_form(cls, A: Matrix) -> Matrix:
         B = [fila[:] for fila in A]
@@ -132,17 +132,17 @@ class MatrixMethods:
                         break
             if B[i][i] == 0:
                 continue
-            
+
             pivote = B[i][i]
             for j in range(i, m):
                 B[i][j] /= pivote
-            
+
             for k in range(i + 1, n):
                 factor = B[k][i]
                 for j in range(i, m):
                     B[k][j] -= factor * B[i][j]
         return Matrix(B)
-    
+
     @classmethod
     def reduced_row_echelon_form(cls, A: Matrix) -> Matrix:
         """
@@ -152,7 +152,7 @@ class MatrixMethods:
         Retorna una nueva matriz (no muta A).
         """
         # 1) Copiar la matriz original para trabajar sobre la copia
-        B = [fila[:] for fila in A._augmented_matrix_I().value]
+        B = [fila[:] for fila in A.value]
         
         n = len(B)
         m = len(B[0]) if n > 0 else 0
@@ -200,7 +200,6 @@ class MatrixMethods:
 
         return Matrix(B)
 
-
 # -------------------------------------------------------------------------
 # 3  Clase Matrix pública --------------------------------------------------
 # -------------------------------------------------------------------------
@@ -222,26 +221,13 @@ class Matrix(
         """Forma escalonada reducida (Gauss‑Jordan) cacheada."""
         return MatrixMethods.reduced_row_echelon_form(self)
 
-    # ---------------- representación -------------------------------------
-    def __2str__(self) -> str:
-        col_widths = [
-            max(len(str(self.value[i][j])) 
-                for i in range(len(self.value))) 
-            for j in range(len(self.value[0]))
-            ]        
-        matrix_str = '\n'.join(
-            '[' + '  '.join(f"{str(self.value[i][j]):<{col_widths[j]}}" 
-                            for j in range(len(self.value[0]))) + ']'
-            for i in range(len(self.value))
-        )    
-        return matrix_str 
-    
+    # ---------------- representación -------------------------------------   
     def __str__(self) -> str:
-        from ..printing.printer_alg import LinAlgTextFormatter
+        from ...printing.printer_alg import LinAlgTextFormatter
         return LinAlgTextFormatter.matrix_str(self)          
     
     def _repr_latex_(self, name: Optional[str] = None) -> str:
-        from ..printing.printer_alg import LinAlgTextFormatter
+        from ...printing.printer_alg import LinAlgTextFormatter
         return LinAlgTextFormatter.matrix_latex(self, name)   
     
     # ------------- suma ---------------------------------------------------
@@ -329,22 +315,38 @@ class Matrix(
     # ---------------------------------------------------------------------
     
     # ---------- API pública reaprovecha la caché --------------------
+    @overload
+    def row_echelon_form(self, *, return_base: Literal[False] = False) -> Matrix: ...
+    @overload
+    def row_echelon_form(self, *, return_base: Literal[True]) -> Tuple[Matrix, Matrix]: ...
+    
     def row_echelon_form(
         self, *, return_base: bool = False
-    ) -> Union["Matrix", Tuple["Matrix", "Matrix"]]:
+    ) -> Union[Matrix, Tuple[Matrix, Matrix]]:
+        """Devuelve la matriz reducida o una tupla (P, B) donde P^-1 B P = A"""
         if return_base:
             aug = MatrixMethods.row_echelon_form(self._augmented_matrix_I())
             return (
                 Matrix([row[self.shape[0]:] for row in aug]),
-                Matrix([row[: self.shape[0]] for row in aug]),
+                Matrix([row[:self.shape[0]] for row in aug]),
             )
         return self._ref
 
+    @overload
+    def reduced_row_echelon_form(self, *, return_base: Literal[False] = False) -> Matrix: ...
+    @overload
+    def reduced_row_echelon_form(self, *, return_base: Literal[True]) -> Tuple[Matrix, Matrix]: ...
+    
     def reduced_row_echelon_form(
         self, *, return_base: bool = False
-    ) -> Matrix:
+    ) -> Union[Matrix, Tuple[Matrix, Matrix]]:
+        """Devuelve la matriz reducida o una tupla (P, B) donde P^-1 B P = A"""
         if return_base:
-            return self.inv()
+            aug = MatrixMethods.reduced_row_echelon_form(self._augmented_matrix_I())
+            return (
+                Matrix([row[self.shape[0]:] for row in aug]),
+                Matrix([row[:self.shape[0]] for row in aug]),
+            )
         return self._rref
 
     @property
@@ -358,8 +360,7 @@ class Matrix(
         
     def rank(self) -> int:
         """Calcula el rango de la matriz como número de filas no nulas tras triangularizar."""
-        return sum(any(abs(x) > 1e-10 for x in row) for row in self._rref)  # RREF cacheada
-
+        return sum(any(abs(x) > 1e-10 for x in row) for row in self._rref)
 
     def _to_upper_triangular_similarity(self) -> Tuple['Matrix','Matrix']:
         """
@@ -407,9 +408,6 @@ class Matrix(
         from .scalar import Scalar
         return Scalar(prod)
 
-    
-
-
     @classmethod
     def eye(cls, n: int) -> Matrix:
         return cls([[1 if i == j else 0 for j in range(n)] for i in range(n)])
@@ -444,6 +442,7 @@ class Matrix(
         """Calcula la traza de la matriz."""
         if not self.is_squared:
             raise ValueError("La traza solo está definida para matrices cuadradas.")
+        from .scalar import Scalar
         return Scalar(sum(self.value[i][i] for i in range(self.shape[0])))
     
     @property
@@ -458,8 +457,6 @@ class Matrix(
                     return False
         return True
     
-
-
     def minor(self, i: int, j: int) -> Matrix:
         """Calcula la matriz menor eliminando la fila i y la columna j."""
         return Matrix([row[:j] + row[j+1:] for row in (self.value[:i] + self.value[i+1:])])
@@ -507,10 +504,9 @@ class Matrix(
         
     def inv(self) -> Matrix:
         if self.rank() != self.shape[0]:
-            raise ValueError("La matriz no es invertible.")
-        n = self.shape[0]
-        aug = self._rref  # ya incluye [A | I] tratada
-        return Matrix([row[n:] for row in aug])
+            raise ValueError("La matriz no es invertible.")        
+        aug = MatrixMethods.reduced_row_echelon_form(self._augmented_matrix_I())
+        return Matrix([row[self.shape[0]:] for row in aug])
         
     def char_poly(self):
         """Devuelve el polinomio caracteristico"""

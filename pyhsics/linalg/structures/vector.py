@@ -11,12 +11,12 @@ from __future__ import annotations
 from random import random, gauss
 from typing import (
     Iterable, Iterator, List, Optional,
-    overload, TYPE_CHECKING, ClassVar
+    overload, TYPE_CHECKING
 )
 
-from .algebraic_core import (
-    Algebraic, Addable, Multiplyable,
-    ScalarLike, VectorLike,
+from ..core.algebraic_core import (
+    Addable, Multiplyable,
+    Algebraic, ScalarLike, VectorLike,
     AlgebraicOps, round_T_Scalar
 )
 
@@ -51,6 +51,10 @@ class VectorCore(Algebraic[VectorLike]):
     def is_identity(self) -> bool:
         return all(x == 1 for x in self._value)
     
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, VectorCore):
+            return self.value == other.value
+        return False 
 
 # -------------------------------------------------------------------------
 # 2  Vector público --------------------------------------------------------
@@ -78,11 +82,11 @@ class Vector(
     
     # ---------------- representación --------------------------------------
     def __str__(self) -> str:
-        from ..printing.printer_alg import LinAlgTextFormatter
+        from ...printing.printer_alg import LinAlgTextFormatter
         return LinAlgTextFormatter.vector_str(self)
     
     def _repr_latex_(self, name: Optional[str] = None) -> str:
-        from ..printing.printer_alg import LinAlgTextFormatter
+        from ...printing.printer_alg import LinAlgTextFormatter
         return LinAlgTextFormatter.vector_latex(self, name)
     
     # ------------- suma ---------------------------------------------------
@@ -91,7 +95,8 @@ class Vector(
     @overload
     def __add__(self, other: Vector) -> Vector: ...
     
-    def __add__(self, other):
+    def __add__(self, other): # type: ignore[override]
+        """Suma de vectores o vector + punto."""    
         from .point import Point
         if not isinstance(other, VectorCore):
             return NotImplemented
@@ -105,8 +110,9 @@ class Vector(
     @overload
     def __sub__(self, other: Vector) -> Vector: ...
     
-    def __sub__(self, other):
-        return self + (- other)
+    def __sub__(self, other): # type: ignore[override]
+        """Resta de vectores o vector - punto."""
+        return self + (- other) # type: ignore[no-redef]
 
     def __neg__(self) -> Vector:
         return Vector([-x for x in self._value])
@@ -247,6 +253,9 @@ class Vector(
         if not isinstance(other, Vector):
             return False
         return not self.are_linear_indep(self, other)
+
+    def __ne__(self, other: object) -> bool:
+        return not self.__eq__(other)
 
     def __hash__(self):
         return hash(tuple(self.norm().value))

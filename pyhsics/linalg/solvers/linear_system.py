@@ -3,11 +3,11 @@ from typing import List, Literal, Optional, Set, Union, Dict, Tuple
 import re
 from math import lcm
 
-from .complex_fraction import ComplexFraction
-from .vector import Vector
-from .matrix import Matrix
+from ..core.complex_fraction import ComplexFraction
+from ..structures.vector import Vector
+from ..structures.matrix import Matrix
 
-from .algebraic_core import ScalarLike, VectorLike, MatrixLike
+from ..core.algebraic_core import ScalarLike, VectorLike, MatrixLike
 from functools  import reduce
 
 def vector_to_integer_coords(vec_float: Union[Vector,VectorLike]):
@@ -38,7 +38,7 @@ def vector_to_integer_coords(vec_float: Union[Vector,VectorLike]):
 
 MODES = Literal['Answers','LES', 'MS', 'AM']
 
-class LinearSistem:
+class LinearSystem:
     """
     Representa un sistema de ecuaciones lineales de la forma A·X = B.
     Incluye detección de sistemas con solución única, infinitas soluciones
@@ -83,13 +83,13 @@ class LinearSistem:
         """
         return self._value.shape  # Ajustar según tu implementación de Matrix
 
-    def __add__(self, other: "LinearSistem") -> "LinearSistem":
+    def __add__(self, other: "LinearSystem") -> "LinearSystem":
         """
         Suma de sistemas lineales (suma término a término). 
         Se asume que tienen la misma dimensión.
         """
         # Suponiendo que Matrix y Vector soportan la operación +
-        return LinearSistem(
+        return LinearSystem(
             self._value.vstack(other._value),
             self.B.value + other.B.value,
             repr_mode=self.repr_mode
@@ -150,7 +150,7 @@ class LinearSistem:
             # En la RREF, las primeras m columnas (0..m-1) deben formar
             # la identidad, y la última columna (col -1) es la solución particular.
             return M_rref.col(-1)  # Devuelve un Vector con la solución
-
+        
         # Caso (c): Infinitas soluciones
         # rank(A) = rankAug < m
         # Calculamos la solución particular y los vectores libres.
@@ -246,7 +246,7 @@ class LinearSistem:
         return f"${latex_output}$"
 
     @staticmethod
-    def parse_equations(equations: List[str]) -> "LinearSistem":
+    def parse_equations(equations: List[str]) -> "LinearSystem":
         """
         Crea un objeto LinearSistem a partir de una lista de ecuaciones en formato string.
         Ejemplos de ecuaciones:
@@ -310,6 +310,7 @@ class LinearSistem:
             }
             """
             # Sustituimos los signos '-' por '+-' para poder hacer split más fácil
+            expr = expr.replace(" ", "")  # Limpiamos espacios
             expr = expr.replace("-", "+-")
             # Dividimos por '+'
             terms = expr.split("+")
@@ -380,5 +381,5 @@ class LinearSistem:
         matA = Matrix(A)
         vecB = Vector(B)
 
-        return LinearSistem(matA, vecB, repr_mode="Linear-Equation-Sistem")
+        return LinearSystem(matA, vecB, repr_mode="Linear-Equation-Sistem")
 

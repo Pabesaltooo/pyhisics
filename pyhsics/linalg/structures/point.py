@@ -1,8 +1,9 @@
 from __future__ import annotations
-from typing import overload, TYPE_CHECKING
+from typing import Optional, overload, TYPE_CHECKING
 
-from .algebraic_core import (
-     Addable, Multiplyable,
+
+from ..core.algebraic_core import (
+    Addable, Multiplyable, 
     ScalarLike, VectorLike,
     AlgebraicOps, round_T_Scalar
 )
@@ -23,7 +24,7 @@ class Point(VectorCore, Addable[VectorLike], Multiplyable[VectorLike]):
         from .matrix import Matrix
         return str(Matrix([self._value]))
     
-    def _repr_latex_(self) -> str: # TODO
+    def _repr_latex_(self, name: Optional[str] = None) -> str: # TODO
         from .matrix import Matrix
         return f'${Matrix([self._value]).latex()}$'
 
@@ -78,7 +79,7 @@ class Point(VectorCore, Addable[VectorLike], Multiplyable[VectorLike]):
     def __truediv__(self, other: Scalar) -> Point:
         ...
 
-    def __truediv__(self, other):
+    def __truediv__(self, other): # type: ignore[override]
         from .scalar import Scalar                        
         if isinstance(other, ScalarLike):
             other = Scalar(other)

@@ -15,8 +15,9 @@ from __future__ import annotations
 from math import isclose
 from typing import Any, Optional, overload, TYPE_CHECKING
 
-from .algebraic_core import (
-    Algebraic, ScalarLike, Addable, Multiplyable, VectorLike, MatrixLike,
+from ..core.algebraic_core import (
+    Addable, Multiplyable,
+    Algebraic, ScalarLike, VectorLike, MatrixLike,
     AlgebraicOps, round_T_Scalar, SCALAR_TYPES
 )
 
@@ -40,11 +41,11 @@ class Scalar(
 
     # ------------- representación -------------------------------------
     def __str__(self) -> str:            # str(s)
-        from ..printing.printer_alg import LinAlgTextFormatter
+        from ...printing.printer_alg import LinAlgTextFormatter
         return LinAlgTextFormatter.scalar_str(self.value)
     
     def _repr_latex_(self, name: Optional[str] = None) -> str:  # Jupyter
-        from ..printing.printer_alg import LinAlgTextFormatter
+        from ...printing.printer_alg import LinAlgTextFormatter
         return LinAlgTextFormatter.scalar_latex(self.value, name)
 
     # ------------- helpers de Algebraic -------------------------------
@@ -119,10 +120,11 @@ class Scalar(
     def __pow__(self, exp):  # type: ignore[override]
         if isinstance(exp, Scalar):
             exp_val = exp._value
-        if isinstance(exp, ScalarLike):
+        elif isinstance(exp, ScalarLike):
             exp_val = exp
-            return Scalar(self._value ** exp_val)
-        raise ValueError(f'Sólo se permite dividir entre escalares.')
+        else:
+            raise TypeError(f'El exponente debe ser un escalar.')
+        return Scalar(self._value ** exp_val)
 
     # ------------- coerciones Python ----------------------------------
     def __float__(self) -> float:

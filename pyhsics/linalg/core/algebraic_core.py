@@ -14,15 +14,19 @@ from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import (
-    TypeAlias, TypeVar, Generic, Any, Protocol, Union, overload, runtime_checkable, List, TYPE_CHECKING
+    TypeAlias, TypeVar, Generic, 
+    List, Any, 
+    Protocol, runtime_checkable,
+    Union, overload,
+    TYPE_CHECKING
 )
 
-from ..printing.printable import Printable
+from ...printing.printable import Printable
 
 if TYPE_CHECKING:
-    from .scalar  import Scalar
-    from .vector  import Vector
-    from .matrix  import Matrix
+    from ..structures.scalar  import Scalar
+    from ..structures.vector  import Vector
+    from ..structures.matrix  import Matrix
 
 # ---------------------------------------------------------------------------
 # 1.  Aliases de primer nivel ===============================================
@@ -226,9 +230,9 @@ def T2Algebraic(val: object): # type: ignore[overload]
     Convierte cualquier representación literal (nativo Python) a
     Scalar | Vector | Matrix.  Evita dependencias inversas.
     """
-    from .scalar  import Scalar   # import local p/ romper ciclos
-    from .vector  import Vector
-    from .matrix  import Matrix
+    from ..structures.scalar  import Scalar   # import local p/ romper ciclos
+    from ..structures.vector  import Vector
+    from ..structures.matrix  import Matrix
 
     if isinstance(val, ScalarLike):
         return Scalar(val)
