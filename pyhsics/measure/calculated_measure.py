@@ -36,7 +36,7 @@ class CalculatedMeasure(MeasureBaseClass):
         
         self.name:          Optional[str]               = name
         self.formula_str:   str                         = formula_str
-        self.measurements:  Dict[str, DirectMeasure]  = measurements
+        self.measurements:  Dict[str, DirectMeasure]    = measurements
         self._sym_dict:     dict[str, Symbol]           = {key: Symbol(key) for key in measurements.keys()}
         self.formula:       Expr                        = sympify(formula_expr, locals=self._sym_dict).simplify() # type: ignore
         
@@ -81,7 +81,7 @@ class CalculatedMeasure(MeasureBaseClass):
             return f"{self.name} = {dm}"
         return str(dm)
 
-    def _latex(self) -> str:
+    def _repr_latex_(self, name: Optional[str] = None) -> str:
         formula_latex = self.formula._repr_latex_().replace('$', '') # type: ignore
         if self.name:
             formula_latex = self.name + '\\;=\\;' + formula_latex
@@ -94,16 +94,6 @@ class CalculatedMeasure(MeasureBaseClass):
         else:
             (value_norm, error_norm, exponent) = self.normalice_str()
             return f"${formula_latex} =  ({value_norm} \\pm {error_norm}) \\cdot 10^" + "{" + str(exponent)+ "} \\;\\;" + self.units.latex() + "$"
-        
-    def __repr__(self) -> str:
-        try:
-            get_ipython() # type: ignore
-            self.display_latex()
-            return ''
-        except NameError:
-            from .utils_measure import round_measure
-            value_rnd, error_rnd = round_measure(self.value, self.error)
-            return f"CalculatedMeasure({self.formula_str}, {value_rnd}, {error_rnd}, {self.units})"
         
 
     def __neg__(self) -> 'DirectMeasure':

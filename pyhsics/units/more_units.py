@@ -26,6 +26,11 @@ watt = UnitComposition({
     FundamentalUnit.TIME: -3
 })
 
+watt_m2 = UnitComposition({
+    FundamentalUnit.MASS: 1,
+    FundamentalUnit.TIME: -3
+})
+
 coulomb = UnitComposition({
     FundamentalUnit.ELECTRIC_CURRENT: 1,
     FundamentalUnit.TIME: 1
@@ -51,7 +56,7 @@ hertz = UnitComposition({
 
 pascal = UnitComposition({
     FundamentalUnit.DISTANCE: -1,
-    FundamentalUnit.TIME: -1,
+    FundamentalUnit.TIME: -2,
     FundamentalUnit.MASS: 1,
 })
 
@@ -88,6 +93,13 @@ ohm_m = UnitComposition({
     FundamentalUnit.ELECTRIC_CURRENT: -2
     })
 
+volt_m = UnitComposition({
+    FundamentalUnit.MASS: 1,
+    FundamentalUnit.DISTANCE: 1,
+    FundamentalUnit.TIME: -3,
+    FundamentalUnit.ELECTRIC_CURRENT: -1
+})
+
 def add_derived_units_to_alias_manager():
     # Al iniciar el modulo
     # Registrar las unidades derivadas en el gestor de alias
@@ -107,3 +119,5 @@ def add_derived_units_to_alias_manager():
     UnitAliasManager.add_alias(henrry.unit_dict, "H")
     
     UnitAliasManager.add_alias(ohm_m.unit_dict, "Ωm")
+    UnitAliasManager.add_alias(watt_m2.unit_dict, "W/m**2")
+    UnitAliasManager.add_alias(volt_m.unit_dict, "V/m")

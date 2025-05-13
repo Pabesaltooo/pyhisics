@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 from ..linalg import Scalar, ScalarLike
 
@@ -35,6 +35,8 @@ class DirectMeasure(MeasureBaseClass):
                  units: Union[str, Unit] = "1") -> None:
         
         from .utils_measure import round_measure, process_measure_error_unit
+        if isinstance(value, complex) or isinstance(error, complex):
+            raise ValueError("Complex numbers are not supported.")
         value = float(value)
         error = float(error)
         
@@ -48,8 +50,6 @@ class DirectMeasure(MeasureBaseClass):
         self._error = ScalarQuantity(error_rnd, new_units)
         self._units = new_units
         
-
-        
     def __str__(self) -> str:
         from .utils_measure import round_measure
         value_rnd, error_rnd = round_measure(self.value, self.error)
@@ -57,11 +57,11 @@ class DirectMeasure(MeasureBaseClass):
             return f"({value_rnd} ± {error_rnd}) {self.units}"
         else:
             (value_norm, error_norm, exponent) = self.normalice_str()
-            from ..units.unit_printer import UnitPrinter
-            exp_str = UnitPrinter.superindice(exponent)
+            from ..printing.helpers import to_superscript
+            exp_str = to_superscript(exponent)
             return f"({value_norm} ± {error_norm})·10{exp_str} {self.units}"
 
-    def _latex(self) -> str:
+    def _repr_latex_(self, name: Optional[str] = None) -> str:
         from .utils_measure import round_measure
         value_rnd, error_rnd = round_measure(self.value, self.error)
         if 0.001 < abs(value_rnd) < 10_000:
@@ -70,16 +70,6 @@ class DirectMeasure(MeasureBaseClass):
             (value_norm, error_norm, exponent) = self.normalice_str()
             return f"$({value_norm} \\pm {error_norm}) \\cdot 10^" + "{" + str(exponent)+ "} \\;\\;" + self.units.latex() + "$"
         
-    def __repr__(self) -> str:
-        try:
-            get_ipython() # type: ignore
-            self.display_latex()
-            return ''
-        except NameError:
-            from .utils_measure import round_measure
-            value_rnd, error_rnd = round_measure(self.value, self.error)
-            return f"DirectMeasure({value_rnd}, {error_rnd}, {self.units})"
-
     def __neg__(self) -> "DirectMeasure":
         return DirectMeasure(-self.value.value, self.error.value, self.units)
 

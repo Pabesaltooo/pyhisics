@@ -183,9 +183,9 @@ class Vector(
 
     @property
     def magnitude(self) -> Scalar:
-        from .scalar import Scalar
-        mag2 = AlgebraicOps.st_dot(self._value, self._value)
-        return Scalar((mag2)**(1/2))
+        from ...funcs import sqrt
+        mag2 = abs(self.dot(self))
+        return sqrt(mag2)
 
     def norm(self) -> Vector:
         mag = self.magnitude.value

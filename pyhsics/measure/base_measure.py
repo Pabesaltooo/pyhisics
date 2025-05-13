@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from math import floor, log10
-from typing import TYPE_CHECKING, Tuple, Union
+from typing import TYPE_CHECKING, Optional, Tuple, Union
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from IPython.display import display, Latex #type: ignore
 
+from ..printing.printable import Printable
 from ..quantity import ScalarQuantity
 from ..units import Unit
 from .utils_measure import Operable, operable_to_measure
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class MeasureBaseClass(ABC):
+class MeasureBaseClass(Printable, ABC):
     """
     Clase base para medidas que define el comportamiento común, incluidos
     los operadores aritméticos. 
@@ -49,12 +50,8 @@ class MeasureBaseClass(ABC):
         pass
     
     @abstractmethod
-    def __repr__(self) -> str:
-        pass
-    
-    @abstractmethod
-    def _latex(self) -> str:
-        """Crea un string para representar el oobjeto en LaTex"""
+    def _repr_latex_(self, name: Optional[str] = None) -> str:
+        """Crea un string para representar el objeto en LaTex"""
         pass
     
     def __add__(self, other: Operable) -> 'DirectMeasure':
@@ -87,9 +84,6 @@ class MeasureBaseClass(ABC):
     def __pow__(self, other: Operable) -> "DirectMeasure":
         from .operator_measure import MeasureAlgebraicOperator
         return MeasureAlgebraicOperator.pow(self, other)
-
-    def display_latex(self):
-        display(Latex(self._latex()))
         
     def normalice_str(self) -> Tuple[Union[int,  float], Union[int,  float], int]:
         """value, error, exp"""

@@ -2,7 +2,7 @@ from math import floor, log10
 from typing import Any, List, Optional, Tuple
 from enum import Enum
 from ..linalg import Vector, Matrix, Scalar, ScalarLike
-from linalg.core.algebraic_core import round_T_Scalar
+from ..linalg.core.algebraic_core import round_T_Scalar
 from .helpers import to_superscript
 
 class PrintingMode(Enum):

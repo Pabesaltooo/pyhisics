@@ -12,7 +12,7 @@
 from __future__ import annotations
 
 from typing import (
-    Iterable, Iterator, List, Optional, Tuple, Union, Literal,
+    Iterable, Iterator, List, Optional, Self, SupportsIndex, Tuple, Union, Literal,
     overload, TYPE_CHECKING
 )
 from functools import cached_property
@@ -27,7 +27,6 @@ if TYPE_CHECKING:                          # sólo para el type‑checker
     from .scalar import Scalar
     from .vector import Vector
     from .point import Point
-
 
 # -------------------------------------------------------------------------
 # 1  Pequeños helpers de validación ---------------------------------------
@@ -412,10 +411,10 @@ class Matrix(
     def eye(cls, n: int) -> Matrix:
         return cls([[1 if i == j else 0 for j in range(n)] for i in range(n)])
         
-    def row(self, n: int) -> Vector:
+    def row(self, n: SupportsIndex) -> Vector:
         return self[n]
     
-    def col(self, n: int) -> Vector:
+    def col(self, n: SupportsIndex) -> Vector:
         from .vector import Vector
         return Vector([row[n] for row in self.value])
     
@@ -468,7 +467,7 @@ class Matrix(
             for i in range(self.shape[0])])
 
     @classmethod
-    def from_vecs(cls, vecs: Iterable[Vector]) -> Matrix:
+    def from_vecs(cls, vecs: Iterable[Vector]) -> Self:
         """Sets imput vectors in the cols of the matrix"""
         vec_list = list(vecs)
         if not vec_list:
@@ -541,3 +540,99 @@ class Matrix(
         if self.shape[1] != other.shape[1]:
             raise ValueError("Las matrices deben tener el mismo número de columnas para apilarse verticalmente.")
         return Matrix(self.value + other.value)
+    
+    def elemental_col_transformation(
+        self,
+        col1: Tuple[int, ScalarLike],
+        col2: Tuple[int, ScalarLike]
+    ) -> Matrix:
+        """
+        Perform an elementary column operation:
+        
+        new_column[col1_idx] = scale1 * old_column[col1_idx] + scale2 * old_column[col2_idx]
+        
+        Parameters
+        ----------
+        col1 : Tuple[int, Scalar]
+            (col1_idx, scale1)
+        col2 : Tuple[int, Scalar]
+            (col2_idx, scale2)
+        
+        Returns
+        -------
+        Matrix
+            A new Matrix with the updated column.
+        
+        Example
+        -------
+        >>> M = Matrix([[1,2,3],[4,5,6],[7,8,9]])
+        >>> M2 = M.elemental_col_transformation((0, 2), (1, -1))
+        # This computes: new col 0 = 2*col0 + (-1)*col1
+        """
+        col1_idx, scale1 = col1
+        col2_idx, scale2 = col2
+
+        # Validaciones básicas
+        if not (isinstance(col1_idx, int) and isinstance(col2_idx, int)): # type: ignore
+            raise TypeError("Column indices must be integers")
+
+        # Copiamos la matriz para no mutar la original
+        new_vals: list[list[ScalarLike]] = [row.copy() for row in self.value]
+
+        # Aplicamos la operación fila por fila
+        for i, row in enumerate(self.value):
+            new_vals[i][col1_idx] = scale1 * row[col1_idx] + scale2 * row[col2_idx]
+
+        return Matrix(new_vals)
+    
+    def elemental_row_transformation(
+        self,
+        row1: Tuple[int, ScalarLike],
+        row2: Tuple[int, ScalarLike]
+    ) -> Matrix:
+        """
+        Perform an elementary row operation:
+
+        new_row[row1_idx] = scale1 * old_row[row1_idx] + scale2 * old_row[row2_idx]
+
+        Parameters
+        ----------
+        row1 : Tuple[int, Scalar]
+            (row1_idx, scale1)
+        row2 : Tuple[int, Scalar]
+            (row2_idx, scale2)
+
+        Returns
+        -------
+        Matrix
+            A new Matrix with the updated row.
+
+        Example
+        -------
+        >>> M = Matrix([[1,2,3],
+                        [4,5,6],
+                        [7,8,9]])
+        >>> M2 = M.elemental_row_transformation((0, 2), (1, -1))
+        # This computes: new row 0 = 2*row0 + (-1)*row1
+        """
+        row1_idx, scale1 = row1
+        row2_idx, scale2 = row2
+
+        # Validaciones básicas
+        if not (isinstance(row1_idx, int) and isinstance(row2_idx, int)): # type: ignore
+            raise TypeError("Row indices must be integers")
+
+        # Copiamos la matriz para no mutar la original
+        new_vals: list[list[ScalarLike]] = [row.copy() for row in self.value]
+
+        # Número de columnas para iterar
+        num_cols = len(self.value[0])
+
+        # Aplicamos la operación columna por columna sobre la fila row1_idx
+        for j in range(num_cols):
+            new_vals[row1_idx][j] = (
+                scale1 * self.value[row1_idx][j]
+                + scale2 * self.value[row2_idx][j]
+            )
+
+        return Matrix(new_vals)

@@ -7,7 +7,7 @@ from .printing import setup
 from .printing.setup import set_printing_mode
 from .linalg import (Scalar, Point,
                      Vector, Matrix, 
-                     LinearSystem)
+                     LinearSystem, Form)
 #                     Symbol, symbols, Term, Expression)
 from .units import Unit, UnitAliasManager
 from .quantity import ScalarQuantity, VectorQuantity, Quantity, Constants
@@ -23,6 +23,7 @@ __all__ = [
     'Matrix',
 
     'LinearSystem',
+    'Form',
     
     'Unit',
     'UnitAliasManager',
