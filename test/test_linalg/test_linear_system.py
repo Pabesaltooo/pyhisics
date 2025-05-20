@@ -63,7 +63,12 @@ class TestLinearSystemSolve(unittest.TestCase):
         self.assertIn((0, 0, 1), expected)
 
     def test_parse_equations_and_repr(self) -> None:
-        eqs = ["2*x + 3*y + z = 5", "x - y + 2*z = 4", "z = 1"]
+        eqs = [
+            "2*x + 3*y + z = 5", 
+            "x - y + 2*z = 4", 
+            "z = 1"
+        ]
+        
         sys = LinearSystem.parse_equations(eqs)
         # Check shape
         self.assertEqual(sys.shape, (3, 3))

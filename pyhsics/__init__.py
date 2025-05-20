@@ -3,18 +3,17 @@ Pyhsics: Una librería para cálculos físicos, manejo de unidades, geometría y
 
 Provee clases para trabajar con unidades, cantidades físicas y operaciones geométricas.
 """
-from typing import Iterable, List, Sequence
+from typing import List, Sequence
 
 from pyhsics.linalg.core.algebraic_core import ScalarLike
-from .printing import setup
-from .printing.setup import set_printing_mode
-from .linalg import (Scalar, Point, Matrix, 
-                     Vector, LinearSystem, BilinealForm)
-from .units import Unit, UnitAliasManager
-from .quantity import ScalarQuantity, VectorQuantity, Quantity, Constants
-from .funcs import *
-from .measure import DirectMeasure, CalculatedMeasure
-from .plotter import Plotter, MultiPlotter
+from pyhsics.printing.setup import set_printing_mode
+from pyhsics.linalg import (Scalar, Point, Matrix, 
+                            Vector, LinearSystem, BilinealForm)
+from pyhsics.units import Unit, UnitAliasManager
+from pyhsics.quantity import ScalarQuantity, VectorQuantity, Quantity, Constants
+from pyhsics.funcs import *
+from pyhsics.measure import DirectMeasure, CalculatedMeasure
+from pyhsics.plotter import Plotter, MultiPlotter
 
 def eye(size: int) -> Matrix:
     """

@@ -71,7 +71,10 @@ class Vector(
     _dot_product_matrix: Optional[Matrix] = None
 
     @classmethod
-    def set_dot_form(cls, A: Matrix) -> None:
+    def set_dot_form(cls, A: Optional[Matrix]= None) -> None:
+        if A is None:
+            cls._dot_product_matrix = None
+            return
         if A.is_squared:
             cls._dot_product_matrix = A
 

@@ -21,6 +21,9 @@ class TestVectorBasic(unittest.TestCase):
 
 
 class TestVectorArithmetic(unittest.TestCase):
+    def setUp(self) -> None:
+        Vector.set_dot_form(None)
+        
     def test_add_sub_neg(self) -> None:
         v1 = Vector([1, 2])
         v2 = Vector([3, 4])

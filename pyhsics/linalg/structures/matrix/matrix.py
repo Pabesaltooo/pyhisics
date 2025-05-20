@@ -27,6 +27,10 @@ class Matrix(
         if isinstance(other, Matrix):
             return self._rows_tuple == other._rows_tuple
         return False
+    
+    def __hash__(self) -> int:
+        """Hash de la matriz."""
+        return hash(tuple(tuple(row) for row in self._value))
 
     # ---------- helpers internos ------------------------------------
     @cached_property
