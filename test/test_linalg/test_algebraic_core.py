@@ -1,9 +1,7 @@
 # tests/test_algebraic_core.py
 
 import unittest
-from typing import Any
-
-import pyhsics.linalg.core.algebraic_core as ac  # Ajusta el path si tu módulo está en otro paquete
+from pyhsics.linalg.core import algebraic_core as ac
 
 class TestValidationHelpers(unittest.TestCase):
     def test_validate_same_len_valid(self) -> None:

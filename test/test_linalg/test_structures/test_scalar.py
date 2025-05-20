@@ -1,12 +1,9 @@
 # tests/test_scalar.py
 
 import unittest
-from typing import Any
 
-from pyhsics.linalg.core.algebraic_core import SCALAR_TYPES
-from pyhsics.linalg.structures.scalar import Scalar
-from pyhsics.linalg.structures.vector import Vector
-from pyhsics.linalg.structures.matrix import Matrix
+from pyhsics.linalg.structures import Scalar, Vector, Matrix
+
 
 
 class TestScalarBasic(unittest.TestCase):

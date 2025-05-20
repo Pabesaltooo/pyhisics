@@ -1,8 +1,10 @@
 from __future__ import annotations
 from typing import Union, overload, TYPE_CHECKING
 
+from ..linalg.structures.matrix.matrix import Matrix
 
-from ..linalg import ScalarLike, Scalar, Vector, Matrix, Algebraic
+
+from ..linalg import ScalarLike, Scalar, Vector, Algebraic
 from .core_quantity import Quantity, QOPERABLE, T_, QMultiplyable, QAddable
 
 if TYPE_CHECKING:

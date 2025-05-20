@@ -8,10 +8,11 @@ from typing import (
     TYPE_CHECKING, overload, TypeAlias, Tuple, cast
 )
 
+from ..linalg.structures.matrix.matrix import Matrix
+
 # NOTE: Estos módulos se inicializan mucho antes y no depeden de este módulo
 from ..printing.printable import Printable
-from ..linalg import (Scalar, Vector, Matrix,
-                      ScalarLike, VectorLike, MatrixLike, AlgLike,
+from ..linalg import (Scalar, Vector, ScalarLike, VectorLike, MatrixLike, AlgLike,
                       T2Algebraic)
 from ..units import Unit,UnitComposition
 

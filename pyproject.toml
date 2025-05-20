@@ -1,8 +1,8 @@
 [project]
-name = "pyphysics"
+name = "pyhsics"
 version = "0.1.0"
 description = "Librería de cálculos físicos: unidades, medidas y geometría"
-authors = [{name="Pablo Cabeza", email="tucorreo@ejemplo.com"}]
+authors = [{name="Pablo Cabeza", email="pablocabeza09@gmail.com"}]
 readme = "README.md"
 license = {text = "MIT"}
 dependencies = [

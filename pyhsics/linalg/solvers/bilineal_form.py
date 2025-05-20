@@ -1,11 +1,10 @@
 from __future__ import annotations
-from typing import Any, List, Union
-from ..structures.scalar import Scalar
-from ..structures.vector import Vector
-from ..structures.matrix import Matrix
-from .linear_system import LinearSystem
+from typing import List, Union
 
-class Form(Matrix):
+from pyhsics.linalg.structures import Scalar, Vector, Matrix
+from pyhsics.linalg.solvers.linear_system import LinearSystem
+
+class BilinealForm(Matrix):
     def ker(self) -> Union[Vector,List[Vector], None]:
         return LinearSystem(self, Vector.zeros(len(self))).solve()
     

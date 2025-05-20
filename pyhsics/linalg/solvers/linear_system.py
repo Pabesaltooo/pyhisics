@@ -2,13 +2,12 @@ import sys
 from typing import List, Literal, Optional, Set, Union, Dict, Tuple
 import re
 from math import lcm
-
-from ..core.complex_fraction import ComplexFraction
-from ..structures.vector import Vector
-from ..structures.matrix import Matrix
-
-from ..core.algebraic_core import ScalarLike, VectorLike, MatrixLike
 from functools  import reduce
+
+from pyhsics.linalg.core.complex_fraction import ComplexFraction
+from pyhsics.linalg.core.algebraic_core import Algebraic, ScalarLike, VectorLike, MatrixLike
+from pyhsics.linalg.structures import Vector, Matrix
+
 
 def vector_to_integer_coords(vec_float: Union[Vector,VectorLike]):
     """
@@ -48,7 +47,7 @@ class LinearSystem:
 
     def __init__(
         self, 
-        value: Union[Matrix, MatrixLike],     # Matriz de coeficientes A
+        value: Union[Matrix, MatrixLike, Algebraic[MatrixLike]],     # Matriz de coeficientes A
         B: Union[Vector, VectorLike],         # Vector de términos independientes B
         repr_mode: MODES = "Answers"
     ):
@@ -59,7 +58,7 @@ class LinearSystem:
             Matriz de coeficientes (A).
         B: Vector
             Vector de términos independientes (B).
-        repr_mode: str
+        repr_mode: Literal['Answers','LES', 'MS', 'AM']
             - "Answers": Representación estándar (posibles soluciones).
             - "Linear-Equation-Sistem" o "LES": Muestra cada ecuación.
             - "Matrix-Sistem" o "MS": Visualiza como un sistema matricial.
@@ -92,7 +91,7 @@ class LinearSystem:
         return LinearSystem(
             self._value.vstack(other._value),
             self.B.value + other.B.value,
-            repr_mode=self.repr_mode
+            repr_mode = self.repr_mode
         )
 
 
@@ -381,5 +380,5 @@ class LinearSystem:
         matA = Matrix(A)
         vecB = Vector(B)
 
-        return LinearSystem(matA, vecB, repr_mode="Linear-Equation-Sistem")
+        return LinearSystem(matA, vecB, repr_mode="LES")
 

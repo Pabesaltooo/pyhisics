@@ -23,7 +23,7 @@ from ..core.algebraic_core import (
 
 if TYPE_CHECKING:
     from .vector import Vector
-    from .matrix import Matrix
+    from .matrix.matrix import Matrix
 
 # ---------------------------------------------------------------------
 # 1.  Scalar: clase concreta
@@ -76,7 +76,7 @@ class Scalar(
     
     def __mul__(self, other):  # type: ignore[override]
         from .vector import Vector
-        from .matrix import Matrix
+        from .matrix.matrix import Matrix
         if isinstance(other, ScalarLike):
             other = Scalar(other)
         if isinstance(other, Scalar):

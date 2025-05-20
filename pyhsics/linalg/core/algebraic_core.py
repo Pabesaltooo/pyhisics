@@ -24,9 +24,7 @@ from typing import (
 from ...printing.printable import Printable
 
 if TYPE_CHECKING:
-    from ..structures.scalar  import Scalar
-    from ..structures.vector  import Vector
-    from ..structures.matrix  import Matrix
+    from ..structures import Scalar, Vector, Matrix
 
 # ---------------------------------------------------------------------------
 # 1.  Aliases de primer nivel ===============================================
@@ -230,10 +228,7 @@ def T2Algebraic(val: object): # type: ignore[overload]
     Convierte cualquier representación literal (nativo Python) a
     Scalar | Vector | Matrix.  Evita dependencias inversas.
     """
-    from ..structures.scalar  import Scalar   # import local p/ romper ciclos
-    from ..structures.vector  import Vector
-    from ..structures.matrix  import Matrix
-
+    from ..structures import Scalar, Vector, Matrix   # import local p/ romper ciclos
     if isinstance(val, ScalarLike):
         return Scalar(val)
     if _is_vector(val):

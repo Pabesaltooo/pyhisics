@@ -1,11 +1,8 @@
 # tests/test_linear_system.py
 
 import unittest
-from typing import Any, List, Optional
 
-from pyhsics.linalg.core.complex_fraction import ComplexFraction
-from pyhsics.linalg.structures.vector import Vector
-from pyhsics.linalg.structures.matrix import Matrix
+from pyhsics.linalg.structures import Vector, Matrix
 from pyhsics.linalg.solvers.linear_system import vector_to_integer_coords, LinearSystem
 
 

@@ -1,12 +1,13 @@
 from math import floor, log10
 from typing import Any, List, Optional, Tuple
 from enum import Enum
-from ..linalg import Vector, Matrix, Scalar, ScalarLike
+
+from ..linalg import Vector, Scalar, ScalarLike, Matrix
 from ..linalg.core.algebraic_core import round_T_Scalar
 from .helpers import to_superscript
 
 class PrintingMode(Enum):
-    MATH = 'MATH' # Si esto esta activo los vectores se muestran en columna (1,1,2) 
+    MATH = 'MATH' # Si esto esta activo los vectores se muestran en columna (1,1,2), y los numeros aprox 0 -> 0
     PHYSICS = 'PHYSICS' # Si esto esta activo los vectores se muestran como 1i + 1j + 2k (Se definira al crear la clase y se podra cambiar desde un Jupyter. Por defecto `MATH`)
 
 def _normalize_scalar(value: ScalarLike) -> Tuple[ScalarLike, int]:
@@ -28,17 +29,7 @@ def _normalize_scalar(value: ScalarLike) -> Tuple[ScalarLike, int]:
         mant = round_T_Scalar(mant, 4)
     return mant, exp
 
-def _format_simple(x: Any) -> str:
-    """
-    Return integer string if whole, else rounded string.
-    """
-    if isinstance(x, Scalar):
-        x = x.value
-    if isinstance(x, int):
-        return str(x)
-    if isinstance(x, float) and x.is_integer():
-        return str(int(x))
-    return str(round_T_Scalar(x, 4))
+
 
 def _use_scientific(value: ScalarLike) -> bool:
     """
@@ -78,27 +69,48 @@ class LinAlgTextFormatter:
         """Permite cambiar el modo de impresión a MATH o PHYSICS."""
         cls.printing_mode = mode
        
+    @classmethod
+    def _format_simple(cls, x: Any) -> str:
+        """
+        Return integer string if whole, else rounded string.
+        """
+        if isinstance(x, Scalar):
+            x = x.value
+        if isinstance(x, int):
+            return str(x)
+        if isinstance(x, float) and x.is_integer():
+            return str(int(x))
+        if cls.printing_mode == PrintingMode.MATH:
+            if abs(x) <= 1e-10:
+                return "0"
+        return str(round_T_Scalar(x, 4))
     @classmethod 
     def _format_scalar_latex(cls, value: ScalarLike) -> str:
+        if cls.printing_mode == PrintingMode.MATH:
+            if abs(value) <= 1e-10:
+                return "0"
         if not _use_scientific(value):
-            return _format_simple(value)
+            return cls._format_simple(value)
         else:
             mant, exp = _normalize_scalar(value)
             if mant == 1:
                 return f"10^{{{exp}}}"
             else:
-                return f"{_format_simple(mant)} \\cdot 10^{{{exp}}}"
+                return f"{cls._format_simple(mant)} \\cdot 10^{{{exp}}}"
         
     @classmethod
     def _format_scalar_str(cls, value: ScalarLike) -> str:
+        if cls.printing_mode == PrintingMode.MATH:
+            if abs(value) <= 1e-10:
+                return "0"
         if not _use_scientific(value):
-            return _format_simple(value)
+            return cls._format_simple(value)
         else:
             mant, exp = _normalize_scalar(value)
             if mant == 1:
                 return f"10·{to_superscript(exp)}"
             else:
-                return f"{_format_simple(mant)}·10{to_superscript(exp)}"
+                return f"{cls._format_simple(mant)}·10{to_superscript(exp)}"
             
     @classmethod
     def scalar_latex(cls,
@@ -143,12 +155,12 @@ class LinAlgTextFormatter:
         # Si existe un exponente compartido, usar notación científica
         if shared is not None and _use_scientific(10**shared):
             divisor = 10**shared
-            rows = [_format_simple(v/divisor) for v in data]
+            rows = [cls._format_simple(v/divisor) for v in data]
             body = f'\\begin{{pmatrix}} {" \\\\ ".join(r for r in rows)} \\end{{pmatrix}}'
             text = f"{body} \\cdot 10^{{{shared}}}"
         else:
             # Si no, representamos en formato columna normal
-            rows = [_format_simple(v) for v in data]
+            rows = [cls._format_simple(v) for v in data]
             text = f'\\begin{{pmatrix}} {" \\\\ ".join(r for r in rows)} \\end{{pmatrix}}'
 
         if name:
@@ -203,7 +215,7 @@ class LinAlgTextFormatter:
         
         if shared is not None and _use_scientific(10**shared):
             divisor = 10**shared
-            rows = [[_format_simple(v/divisor)] for v in data]
+            rows = [[cls._format_simple(v/divisor)] for v in data]
             lines = ["(" + row[0] + ")" for row in rows]
             text = "\n".join(lines) + f"·10{to_superscript(shared)}"
         else:
@@ -242,7 +254,7 @@ class LinAlgTextFormatter:
         shared = exps[0] if exps and all(e == exps[0] for e in exps) else None
         if shared is not None and _use_scientific(10**shared):
             divisor = 10**shared
-            rows = [[_format_simple(v/divisor) for v in row] for row in mat.value]
+            rows = [[cls._format_simple(v/divisor) for v in row] for row in mat.value]
             body = _matrix_body(rows, latex=True)
             text = f"{body} \\cdot 10^{{{shared}}}"
         else:
@@ -274,21 +286,21 @@ class LinAlgTextFormatter:
             return f"{name} = {text}"
         return text
 
-    @staticmethod
-    def _entry_latex(v: ScalarLike) -> str:
+    @classmethod
+    def _entry_latex(cls, v: ScalarLike) -> str:
         # Inline uses same logic as scalar
         if not _use_scientific(v):
-            return _format_simple(v)
+            return cls._format_simple(v)
         mant, exp = _normalize_scalar(v)
         if mant == 1:
             return f"10^{{{exp}}}"
-        return f"{_format_simple(mant)} \\cdot 10^{{{exp}}}"
+        return f"{cls._format_simple(mant)} \\cdot 10^{{{exp}}}"
 
-    @staticmethod
-    def _entry_str(v: ScalarLike) -> str:
+    @classmethod
+    def _entry_str(cls, v: ScalarLike) -> str:
         if not _use_scientific(v):
-            return _format_simple(v)
+            return cls._format_simple(v)
         mant, exp = _normalize_scalar(v)
         if mant == 1:
             return f"10·{to_superscript(exp)}"
-        return f"{_format_simple(mant)}·10{to_superscript(exp)}"
+        return f"{cls._format_simple(mant)}·10{to_superscript(exp)}"

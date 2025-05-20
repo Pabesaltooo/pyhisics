@@ -22,7 +22,7 @@ from ..core.algebraic_core import (
 
 if TYPE_CHECKING:                       # — tipos sólo para el checker
     from .scalar import Scalar
-    from .matrix import Matrix
+    from .matrix.matrix import Matrix
     from .point import Point
     
 # -------------------------------------------------------------------------
@@ -77,7 +77,7 @@ class Vector(
 
     @property
     def T(self):
-        from .matrix import Matrix
+        from .matrix.matrix import Matrix
         return Matrix([self._value])
     
     # ---------------- representación --------------------------------------
@@ -165,7 +165,7 @@ class Vector(
     def dot(self, other: Vector, *, form: Optional[Matrix] = None) -> Scalar:
         """Producto punto usando forma bilineal opcional (identidad por defecto)."""
         from .scalar import Scalar
-        from .matrix import Matrix
+        from .matrix.matrix import Matrix
 
         if form is None:
             if self.__class__._dot_product_matrix is None:
@@ -262,7 +262,7 @@ class Vector(
 
     @classmethod
     def are_linear_indep(cls, v1: Vector, v2: Vector) -> bool:
-        from .matrix import Matrix
+        from .matrix.matrix import Matrix
         return Matrix.from_vecs([v1, v2]).rank() == 2
     
     def __round__(self, ndigits: int = 2) -> Vector:

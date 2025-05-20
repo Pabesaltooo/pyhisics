@@ -1,10 +1,7 @@
 # tests/test_matrix.py
 import unittest
 
-from pyhsics.linalg.structures.matrix import Matrix
-from pyhsics.linalg.structures.vector import Vector
-from pyhsics.linalg.structures.scalar import Scalar
-from pyhsics.linalg.structures.point import Point
+from pyhsics.linalg.structures import Scalar, Vector, Point, Matrix
 
 class TestMatrixInitialization(unittest.TestCase):
     def test_init_and_shape(self) -> None:

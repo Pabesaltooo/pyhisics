@@ -12,7 +12,7 @@ from .vector import VectorCore
 
 if TYPE_CHECKING:                       # — tipos sólo para el checker
     from .scalar import Scalar
-    from .matrix import Matrix
+    from .matrix.matrix import Matrix
     from .vector import Vector
 
 
@@ -21,11 +21,11 @@ class Point(VectorCore, Addable[VectorLike], Multiplyable[VectorLike]):
         return False
     
     def __str__(self) -> str: # TODO
-        from .matrix import Matrix
+        from .matrix.matrix import Matrix
         return str(Matrix([self._value]))
     
     def _repr_latex_(self, name: Optional[str] = None) -> str: # TODO
-        from .matrix import Matrix
+        from .matrix.matrix import Matrix
         return f'${Matrix([self._value]).latex()}$'
 
     @overload
@@ -37,7 +37,7 @@ class Point(VectorCore, Addable[VectorLike], Multiplyable[VectorLike]):
     
     def __mul__(self, other): # type: ignore
         from .scalar import Scalar                        
-        from .matrix import Matrix                      
+        from .matrix.matrix import Matrix                      
         if isinstance(other, ScalarLike):
             other = Scalar(other)
         if isinstance(other, Scalar):
