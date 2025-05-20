@@ -6,7 +6,7 @@ from functools  import reduce
 
 from pyhsics.linalg.core.complex_fraction import ComplexFraction
 from pyhsics.linalg.core.algebraic_core import Algebraic, ScalarLike, VectorLike, MatrixLike
-from pyhsics.linalg.structures import Vector, Matrix
+from pyhsics.linalg.structures import Vector, Matrix, Scalar
 
 
 def vector_to_integer_coords(vec_float: Union[Vector,VectorLike]):
@@ -226,23 +226,66 @@ class LinearSystem:
             latex_output += "\\end{aligned}"
 
         elif mode in ("Answers", "A"):
-            # Suponiendo que B[i] ya son las soluciones y que se interpretan
-            # como x_i. Esto es muy simplista, pero depende de tu convención.
-            latex_output += "\\begin{aligned}\n"
-            for i in range(n):
-                latex_output += f"x_{{{i+1}}} = {self.B[i]} \\\\\n"
-            latex_output += "\\end{aligned}"
-
+            latex_output = self.display_solution_results(m)
         elif mode in ("Matrix-Sistem", "MS", "Augmented_Matrix", "AM"):
             # Son casi iguales, salvo que quizás quieras más detalle en "AM"
             latex_output += "\\left( \\begin{array}{"
             latex_output += "c" * m + " | c}\n"
             for i in range(n):
-                fila_str = " & ".join(str(self._value[i][j]) for j in range(m))
+                fila_str = " & ".join(str(Scalar(self._value[i][j]).latex()) for j in range(m))
                 latex_output += f"{fila_str} & {self.B[i]} \\\\\n"
             latex_output += "\\end{array} \\right)"
 
         return f"${latex_output}$"
+
+    def display_solution_results(self, m: int) -> str:
+        solution = self.solve()
+
+        if isinstance(solution, Vector):
+            return  "\\begin{cases}" + "\\\\ ".join(f"x_{i} = {Scalar(solution[i]).latex()}" for i in range(m)) + "\\end{cases}"
+
+        elif isinstance(solution, list):
+            # 1. Formar la aumentada [A | B]
+            A = self._value               # suponemos que es sympy.Matrix n×m
+            B = self.B                    # columna n×1 con los términos independientes
+            M_aug = A.hstack(B)
+
+            # 2. Reducir a RREF
+            M_rref = M_aug.reduced_row_echelon_form()
+
+            # 3. Extraer solo las filas con coeficientes no todos cero
+            vars_tex = [f"x_{{{i}}}" for i in range(m)]
+            eqs: List[str] = []
+            for row in M_rref.value:
+                coefs, const = row[:-1], row[-1]
+                if any(c != 0 for c in coefs) or const != 0:
+                    # construimos LHS = sum(c_i x_i) - const = 0
+                    lhs_terms: List[str] = []
+                    for j, c in enumerate(coefs):
+                        c = Scalar(c)
+                        if c != 0:
+                            sign = "" if c > 0 and not lhs_terms else ("+" if c>0 else "-")
+                            val = abs(c).latex()
+                            lhs_terms.append(f"{sign}{val if val != '1' else ''}{vars_tex[j]}")
+                    # constante al otro lado
+                    eqs.append(f"{' '.join(lhs_terms)} = {(Scalar(const).latex())}")
+
+            # 4. Montar LaTeX
+            if not eqs:
+                return r"\mathbb{R}^{" + str(m) + "}"
+            else:
+                eqs_tex    = r" \\ ".join(eqs)
+                vars_tex_m = r" \\ ".join(vars_tex)
+                return (
+                    r"\displaystyle "
+                    r"\left \{ \, \begin{pmatrix}"
+                    + vars_tex_m +
+                    r"\end{pmatrix} \in \mathbb{R}^{" + str(m) + r"} \; \Bigg| \; \begin{cases}"
+                    + eqs_tex +
+                    r"\end{cases} \right \}"
+                )
+        else:
+            return "\\emptyset" 
 
     @staticmethod
     def parse_equations(equations: List[str]) -> "LinearSystem":
