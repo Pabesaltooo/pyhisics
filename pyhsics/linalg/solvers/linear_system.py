@@ -4,8 +4,9 @@ import re
 from math import lcm
 from functools  import reduce
 
+from pyhsics.printing.printable import Printable
 from pyhsics.linalg.core.complex_fraction import ComplexFraction
-from pyhsics.linalg.core.algebraic_core import Algebraic, ScalarLike, VectorLike, MatrixLike
+from pyhsics.linalg.core.algebraic_core import VectorLike, MatrixLike
 from pyhsics.linalg.structures import Vector, Matrix, Scalar
 
 
@@ -35,9 +36,9 @@ def vector_to_integer_coords(vec_float: Union[Vector,VectorLike]):
 
     return int_coords
 
-MODES = Literal['Answers','LES', 'MS', 'AM']
+MODES = Literal['ANSW','LES', 'MAT-SYS', 'AUG-MAT', 'PARAM']
 
-class LinearSystem:
+class LinearSystem(Printable):
     """
     Representa un sistema de ecuaciones lineales de la forma A·X = B.
     Incluye detección de sistemas con solución única, infinitas soluciones
@@ -47,9 +48,9 @@ class LinearSystem:
 
     def __init__(
         self, 
-        value: Union[Matrix, MatrixLike, Algebraic[MatrixLike]],     # Matriz de coeficientes A
+        value: Union[Matrix, MatrixLike],     # Matriz de coeficientes A
         B: Union[Vector, VectorLike],         # Vector de términos independientes B
-        repr_mode: MODES = "Answers"
+        repr_mode: MODES = "ANSW"
     ):
         """
         Parámetros:
@@ -88,10 +89,11 @@ class LinearSystem:
         Se asume que tienen la misma dimensión.
         """
         # Suponiendo que Matrix y Vector soportan la operación +
+        from typing import cast
         return LinearSystem(
             self._value.vstack(other._value),
             self.B.value + other.B.value,
-            repr_mode = self.repr_mode
+            repr_mode = cast(MODES, self.repr_mode)
         )
 
 
@@ -203,225 +205,174 @@ class LinearSystem:
         
     def _repr_latex_(self, name: Optional[str] = None) -> str:
         """
-        Genera la representación en LaTeX según el modo seleccionado:
-          - "Linear-Equation-Sistem" o "LES": muestra ecuaciones fila a fila.
-          - "Answers" o "A": muestra, de modo simple, x_i = b_i.
-          - "Matrix-Sistem" o "MS": sistema matricial [A|B].
-          - "Augmented_Matrix" o "AM": matriz aumentada.
+        Genera la representación en LaTeX según el modo seleccionado.
         """
+        mode_map = {
+            'ANSW': self._as_solutions,
+            'PARAM': self._parametric_solution,
+            'LES': self._as_linear_equations,
+            'MAT-SYS': self._as_matrix_system,
+            'AUG-MAT': self._as_augmented_matrix,
+        }
+        try:
+            body = mode_map[self.repr_mode]()
+        except KeyError:
+            raise ValueError(f"Modo de representación no válido: {self.repr_mode}")
+
+        if name:
+            return rf"\begin{{equation}}\label{{{name}}}{body}\end{{equation}}"
+        return f"${body}$"
+
+    def _as_augmented_matrix(self) -> str:
         n, m = self.shape
-        latex_output = ""
-        mode = self.repr_mode
+        cols = 'c' * m + '|c'
+        rows: List[str] = []
+        for i in range(n):
+            coeffs = [Scalar(self._value[i][j]).latex() for j in range(m)]
+            coeffs.append(Scalar(self.B[i]).latex())
+            rows.append(' & '.join(coeffs))
+        body = (
+            r"\left(\begin{array}{" + cols + r"}" + 
+            r" \\ ".join(rows) + 
+            r"\end{array}\right)"
+        )
+        return body
 
-        if mode in ("Linear-Equation-Sistem", "LES"):
-            latex_output += "\\begin{aligned}\n"
-            for i in range(n):
-                # Generar término a término: a_ij * x_j
-                eq_terms: List[str] = []
-                for j in range(m):
-                    coef_ij = self._value[i][j]
-                    eq_terms.append(f"{coef_ij}x_{{{j+1}}}")
-                left_part = " + ".join(eq_terms)
-                latex_output += f"{left_part} &= {self.B[i]} \\\\\n"
-            latex_output += "\\end{aligned}"
+    def _as_matrix_system(self) -> str:
+        m = self.shape[1]
+        vecX = r"\begin{pmatrix}" + r" \\ ".join(f"x_{{{j+1}}}" for j in range(m)) + r"\end{pmatrix}"
+        return f"{self.value.latex()} {vecX} = {self.B.latex()}"
 
-        elif mode in ("Answers", "A"):
-            latex_output = self.display_solution_results(m)
-        elif mode in ("Matrix-Sistem", "MS", "Augmented_Matrix", "AM"):
-            # Son casi iguales, salvo que quizás quieras más detalle en "AM"
-            latex_output += "\\left( \\begin{array}{"
-            latex_output += "c" * m + " | c}\n"
-            for i in range(n):
-                fila_str = " & ".join(str(Scalar(self._value[i][j]).latex()) for j in range(m))
-                latex_output += f"{fila_str} & {self.B[i]} \\\\\n"
-            latex_output += "\\end{array} \\right)"
+    def _as_linear_equations(self) -> str:
+        n, m = self.shape
+        lines: List[str] = []
+        for i in range(n):
+            terms: List[str] = []
+            for j in range(m):
+                coef = Scalar(self._value[i][j])
+                if coef == 0:
+                    continue
+                terms.append(self._format_term(coef, j + 1, first=not terms))
+            lhs = '0' if not terms else ' '.join(terms)
+            rhs = Scalar(self.B[i]).latex()
+            lines.append(f"& {lhs} & = & {rhs}")
+        return r"\begin{aligned}" + r" \\ ".join(lines) + r"\end{aligned}"
 
-        return f"${latex_output}$"
+    def _format_term(self, coef: 'Scalar', var_idx: int, first: bool) -> str:
+        sign = '' if coef > 0 and first else ('-' if coef < 0 else '+')
+        abs_coef = abs(coef)
+        coef_str = '' if abs_coef == 1 else str(abs_coef.latex())
+        return f"{sign}{coef_str}x_{{{var_idx}}}"
 
-    def display_solution_results(self, m: int) -> str:
-        solution = self.solve()
+    def _as_solutions(self) -> str:
+        sol = self.solve()
+        if isinstance(sol, Vector):
+            lines = [f"x_{{{i+1}}} = {Scalar(val).latex()}" for i, val in enumerate(sol)]
+            return r"\begin{cases}" + r" \\ ".join(lines) + r"\end{cases}"
 
-        if isinstance(solution, Vector):
-            return  "\\begin{cases}" + "\\\\ ".join(f"x_{i} = {Scalar(solution[i]).latex()}" for i in range(m)) + "\\end{cases}"
+        if isinstance(sol, list):
+            return self._parametric_solution()
 
-        elif isinstance(solution, list):
-            # 1. Formar la aumentada [A | B]
-            A = self._value               # suponemos que es sympy.Matrix n×m
-            B = self.B                    # columna n×1 con los términos independientes
-            M_aug = A.hstack(B)
+        return r"\emptyset"
 
-            # 2. Reducir a RREF
-            M_rref = M_aug.reduced_row_echelon_form()
+    def _parametric_solution(self) -> str:
+        A = self.value
+        B = self.B
+        aug = A.hstack(B)
+        rref_mat = aug.reduced_row_echelon_form()
+        _, m = A.shape
+        eqs: List[str] = []
 
-            # 3. Extraer solo las filas con coeficientes no todos cero
-            vars_tex = [f"x_{{{i}}}" for i in range(m)]
-            eqs: List[str] = []
-            for row in M_rref.value:
-                coefs, const = row[:-1], row[-1]
-                if any(c != 0 for c in coefs) or const != 0:
-                    # construimos LHS = sum(c_i x_i) - const = 0
-                    lhs_terms: List[str] = []
-                    for j, c in enumerate(coefs):
-                        c = Scalar(c)
-                        if c != 0:
-                            sign = "" if c > 0 and not lhs_terms else ("+" if c>0 else "-")
-                            val = abs(c).latex()
-                            lhs_terms.append(f"{sign}{val if val != '1' else ''}{vars_tex[j]}")
-                    # constante al otro lado
-                    eqs.append(f"{' '.join(lhs_terms)} = {(Scalar(const).latex())}")
+        for row in rref_mat.value:
+            coefs, const = row[:-1], row[-1]
+            if not any(c != 0 for c in coefs) and const == 0:
+                continue
+            terms: List[str] = []
+            for j, c in enumerate(coefs):
+                scalar_c = Scalar(c)
+                if scalar_c == 0:
+                    continue
+                terms.append(self._format_term(scalar_c, j+1, first=not terms))
+            rhs = Scalar(const).latex()
+            eqs.append(f"{' '.join(terms)} = {rhs}")
 
-            # 4. Montar LaTeX
-            if not eqs:
-                return r"\mathbb{R}^{" + str(m) + "}"
-            else:
-                eqs_tex    = r" \\ ".join(eqs)
-                vars_tex_m = r" \\ ".join(vars_tex)
-                return (
-                    r"\displaystyle "
-                    r"\left \{ \, \begin{pmatrix}"
-                    + vars_tex_m +
-                    r"\end{pmatrix} \in \mathbb{R}^{" + str(m) + r"} \; \Bigg| \; \begin{cases}"
-                    + eqs_tex +
-                    r"\end{cases} \right \}"
-                )
-        else:
-            return "\\emptyset" 
+        if not eqs:
+            return rf"\mathbb{{R}}^{{{m}}}"
+
+        vars_tex = r" \\ ".join(f"x_{{{i+1}}}" for i in range(m))
+        eqs_tex = r" \\ ".join(eqs)
+
+        return (
+            r"\displaystyle \left \{ \begin{pmatrix}" + vars_tex +
+            r"\end{pmatrix} \in \mathbb{R}^{" + str(m) + r"} \; \Bigg | \; \begin{cases}" +
+            eqs_tex + r"\end{cases} \right \}"
+        )
 
     @staticmethod
     def parse_equations(equations: List[str]) -> "LinearSystem":
         """
-        Crea un objeto LinearSistem a partir de una lista de ecuaciones en formato string.
-        Ejemplos de ecuaciones:
-          "2*x + y = 3"
-          "x - 5*y + 3*z = 7"
-        
-        NOTA: Este parser es básico y no cubre casos avanzados como 
-              paréntesis anidados, exponenciales, etc. 
-              Se asume que las ecuaciones vienen bien formadas, 
-              con '+' y '-' como separadores principales.
-
-        Retorna:
-          LinearSistem con la matriz de coeficientes A y vector B.
+        Parsea ecuaciones lineales sin depender de Sympy.
+        Variables pueden ser x0, x1, y, z, t, u, etc.
         """
-        # 1) Extraer todas las ecuaciones dividiéndolas en parte izquierda y derecha
-        # 2) Identificar todas las variables involucradas para ordenarlas en columnas
-        # 3) Construir las filas de la matriz A y el vector B
+        if not equations:
+            raise ValueError("Se requiere al menos una ecuación.")
 
-        # --- Paso 1: separar en "izquierda" y "derecha" ---
-        left_right_pairs: List[Tuple[str, str]] = []
+        # 1) Separar lados
+        pairs: List[Tuple[str, str]] = []
         for eq in equations:
-            if "=" not in eq:
-                raise ValueError(f"Ecuación inválida, falta '=': {eq}")
-            left, right = eq.split("=")
-            left, right = left.strip(), right.strip()
-            left_right_pairs.append((left, right))
+            if '=' not in eq:
+                raise ValueError(f"Ecuación inválida, falta '=': '{eq}'")
+            left, right = eq.split('=', 1)
+            pairs.append((left.strip(), right.strip()))
 
-        # --- Paso 2: identificar variables (buscamos secuencias tipo x, y, z, t, etc.) ---
-        #     Podríamos usar una expresión regular para capturar algo tipo:
-        #         ([a-zA-Z_]\w*)   -> nombres de variable
-        #     o un approach más manual. Aquí haremos algo básico.
-        variable_set: Set[str] = set()
-        var_pattern = re.compile(r'([a-zA-Z_]\w*)')  # ejemplo: x, y, var_1, etc.
-        
-        for left, right in left_right_pairs:
-            # Buscar todas las variables en la izquierda y en la derecha
-            vars_left = var_pattern.findall(left)
-            vars_right = var_pattern.findall(right)
-            for v in vars_left + vars_right:
-                variable_set.add(v)
+        # 2) Obtener variables con regex ([A-Za-z]\w*)
+        var_pat = re.compile(r'([A-Za-z]\w*)')
+        var_set: Set[str] = set()
+        for l, r in pairs:
+            var_set |= set(var_pat.findall(l))
+            var_set |= set(var_pat.findall(r))
+        if not var_set:
+            raise ValueError("No se encontraron variables en las ecuaciones.")
+        variables = sorted(var_set)
 
-        # Ordenamos las variables alfabéticamente (o según convenga)
-        variables = sorted(variable_set)
-
-        # --- Paso 3: construir A y B ---
-        #     Para cada ecuación, analizamos la parte izquierda (left)
-        #     y movemos todo a la forma standard: (coef_1)*x_1 + ... = valor_derecha
-        #     De la parte derecha, sacamos un valor (que puede tener variables, ojo).
-        #     En un parser simple, asumiremos que la parte derecha es un número
-        #     o una suma/resta de variables también.
-        #     Para generalidad, parsearemos la parte derecha igual que la izquierda
-        #     y luego moveremos todo a la izquierda.
-
-        def parse_side(expr: str) -> Dict[str, ScalarLike]:
-            """
-            Convierte una expresión tipo "2*x - 3*y + 4" en un dict:
-            {
-              'x': 2.0,
-              'y': -3.0,
-              '_const': 4.0
-            }
-            """
-            # Sustituimos los signos '-' por '+-' para poder hacer split más fácil
-            expr = expr.replace(" ", "")  # Limpiamos espacios
-            expr = expr.replace("-", "+-")
-            # Dividimos por '+'
-            terms = expr.split("+")
-            result: Dict[str, ScalarLike] = {}
-            result["_const"] = 0.0
-
-            # Expresión regular para capturar un posible factor numérico
-            # delante de la variable. Ej: "2*x", "-x", "3.5*y", etc.
-            factor_var_pat = re.compile(r'^([+-]?\d*\.?\d*)\*?([a-zA-Z_]\w*)?$')
-
-            for t in terms:
-                t = t.strip()
-                if t == "":
-                    continue
-                # Intentar hacer match
-                match = factor_var_pat.match(t)
-                if match:
-                    factor_str, var_str = match.groups()
-                    if factor_str in ("", "+", "-"):
-                        # Significa 1 o -1
-                        if factor_str.startswith("-"):
-                            factor = -1.0
-                        else:
-                            factor = 1.0
-                    else:
-                        factor = float(factor_str)
-
-                    if var_str is None or var_str == "":
-                        # Significa término constante
-                        result["_const"] += factor
-                    else:
-                        # Sumar en el diccionario
-                        result[var_str] = result.get(var_str, 0.0) + factor
+        # 3) Definir parser de un lado a diccionario var->coef y "_const"
+        def parse_side(expr: str) -> Dict[str, float]:
+            expr = expr.replace('-', '+-')
+            terms = [t for t in expr.replace(' ', '').split('+') if t]
+            data: Dict[str, float] = {v: 0.0 for v in variables}
+            data['_const'] = 0.0
+            term_pat = re.compile(r'^([+-]?\d*\.?\d*)(?:\*?([A-Za-z]\w*))?$')
+            for term in terms:
+                m = term_pat.match(term)
+                if not m:
+                    raise ValueError(f"Término inválido: '{term}'")
+                coef_str, var_str = m.groups()
+                coef = float(coef_str) if coef_str not in ('', '+', '-') else (1.0 if coef_str != '-' else -1.0)
+                if var_str:
+                    data[var_str] = data.get(var_str, 0.0) + coef
                 else:
-                    # Si no hace match, podría ser un término numérico suelto
-                    # p.e. "3.5"
-                    try:
-                        val = float(t)
-                        result["_const"] += val
-                    except ValueError:
-                        raise ValueError(f"Término inválido al parsear: '{t}'")
-            return result
+                    data['_const'] += coef
+            return data
 
-        # Construimos las filas de la forma A y B
-        A: MatrixLike = []
-        B: VectorLike = []
+        # 4) Construir matrices
+        A: List[List[float]] = []
+        B: List[float] = []
+        for left, right in pairs:
+            left_data = parse_side(left)
+            right_data = parse_side(right)
+            # mover right al left: left - right = 0
+            row: List[float] = []
+            for v in variables:
+                coef = left_data.get(v, 0.0) - right_data.get(v, 0.0)
+                row.append(coef)
+            const = right_data['_const'] - left_data['_const']
+            A.append(row)
+            B.append(const)
 
-        for left, right in left_right_pairs:
-            left_dict = parse_side(left)
-            right_dict = parse_side(right)
-            # Pasamos todo (right) al lado izquierdo: left - right = 0
-            # => (left_dict[var] - right_dict[var]) * var + ... = 0
-            for var in variables:
-                left_dict[var] = left_dict.get(var, 0.0) - right_dict.get(var, 0.0)
-            left_dict["_const"] = left_dict["_const"] - right_dict["_const"]
+        return LinearSystem(
+            Matrix(A), 
+            Vector(B)
+        )
 
-            # A: coeficientes de las variables en orden
-            rowA: List[ScalarLike] = []
-            for var in variables:
-                rowA.append(left_dict.get(var, 0.0))
-
-            # B: -_const (para que quede rowA * x = -const)
-            #  Queremos left_dict[var]*x + ... = -left_dict["_const"]
-            #  => A * X = B, con B = -_const.
-            A.append(rowA)
-            B.append(-left_dict["_const"])
-        
-        matA = Matrix(A)
-        vecB = Vector(B)
-
-        return LinearSystem(matA, vecB, repr_mode="LES")
-
+    def __str__(self) -> str:
+        return f"Linear System:\nA = {self.value}\nB = {self.B}\n"

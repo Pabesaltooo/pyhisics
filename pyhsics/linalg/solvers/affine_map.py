@@ -3,7 +3,7 @@ from __future__ import annotations
 from pyhsics.printing.printable import Printable
 from pyhsics.linalg.structures import Vector, Point, Matrix
 
-class AffinMap(Printable):
+class AffineMap(Printable):
     def __init__(self, A: Matrix, B: Point) -> None:
             self.linear_aplication = A
             self.point = B
@@ -11,9 +11,9 @@ class AffinMap(Printable):
     def __call__(self, X: Point) -> Point:
         return self.linear_aplication * X + self.point    
     
-    def inv(self) -> AffinMap:
+    def inv(self) -> AffineMap:
         A = self.linear_aplication.inv()
-        return AffinMap(A, -A*self.point)
+        return AffineMap(A, -A*self.point)
     
     def _repr_latex_(self, name: str | None = None) -> str:
          return f'${self.linear_aplication.latex()} X + {self.point.latex()}$'
