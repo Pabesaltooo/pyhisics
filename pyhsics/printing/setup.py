@@ -2,7 +2,9 @@
 
 from typing import Literal, Sequence, Any
 from IPython import get_ipython
-from .printer_alg import LinAlgTextFormatter, PrintingMode
+
+from .core import PrintingMode
+from .printer_alg import LinAlgTextFormatter
 from .printable import Printable
 
 ip = get_ipython()

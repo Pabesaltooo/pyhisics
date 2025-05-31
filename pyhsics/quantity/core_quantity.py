@@ -121,7 +121,10 @@ class Quantity(QAddable[T], QMultiplyable[T], Printable, ABC, Generic[T]):
         return f"{self.value} {self.units}"
 
     def _repr_latex_(self, name: Optional[str] = None) -> str:
-        return f"${self.value.latex()}\\;{self.units.latex()}$"
+        ss = '$'
+        if name:
+            ss += name + ' = '
+        return f"{ss}{self.value.latex()}\\;{self.units.latex()}$"
 
     # ---------- Nueva -------------------------------------------------------
     @overload

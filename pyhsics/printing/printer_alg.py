@@ -1,14 +1,11 @@
 from math import floor, log10
 from typing import Any, List, Optional, Tuple
-from enum import Enum
+
+from pyhsics.printing.core import BasicPrinter, PrintingMode
 
 from ..linalg import Vector, Scalar, ScalarLike, Matrix
 from ..linalg.core.algebraic_core import round_T_Scalar
 from .helpers import to_superscript
-
-class PrintingMode(Enum):
-    MATH = 'MATH' # Si esto esta activo los vectores se muestran en columna (1,1,2), y los numeros aprox 0 -> 0
-    PHYSICS = 'PHYSICS' # Si esto esta activo los vectores se muestran como 1i + 1j + 2k (Se definira al crear la clase y se podra cambiar desde un Jupyter. Por defecto `MATH`)
 
 def _normalize_scalar(value: ScalarLike) -> Tuple[ScalarLike, int]:
     """
@@ -56,18 +53,11 @@ def _matrix_body(rows: List[List[str]], latex: bool = True) -> str:
         return r"\begin{pmatrix}" + " \\\\ ".join(lines) + r"\end{pmatrix}"
     return ""
 
-class LinAlgTextFormatter:
+class LinAlgTextFormatter(BasicPrinter):
     """
     General formatter for scalars, vectors, and matrices.
     Provides both LaTeX and plain-text (`str`) methods.
     """
-
-    printing_mode = PrintingMode.MATH  # Por defecto, usamos el modo MATH    
-
-    @classmethod
-    def set_printing_mode(cls, mode: PrintingMode):
-        """Permite cambiar el modo de impresión a MATH o PHYSICS."""
-        cls.printing_mode = mode
        
     @classmethod
     def _format_simple(cls, x: Any) -> str:

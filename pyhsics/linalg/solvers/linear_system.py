@@ -1,5 +1,5 @@
 import sys
-from typing import List, Literal, Optional, Set, Union, Dict, Tuple
+from typing import List, Optional, Set, Union, Dict, Tuple
 import re
 from math import lcm
 from functools  import reduce
@@ -7,7 +7,9 @@ from functools  import reduce
 from pyhsics.printing.printable import Printable
 from pyhsics.linalg.core.complex_fraction import ComplexFraction
 from pyhsics.linalg.core.algebraic_core import VectorLike, MatrixLike
-from pyhsics.linalg.structures import Vector, Matrix, Scalar
+from pyhsics.linalg.structures import Vector, Matrix
+
+from pyhsics.printing.core import LINEAR_SYS_FORMATTING_MODES as MODES
 
 
 def vector_to_integer_coords(vec_float: Union[Vector,VectorLike]):
@@ -36,8 +38,6 @@ def vector_to_integer_coords(vec_float: Union[Vector,VectorLike]):
 
     return int_coords
 
-MODES = Literal['ANSW','LES', 'MAT-SYS', 'AUG-MAT', 'PARAM']
-
 class LinearSystem(Printable):
     """
     Representa un sistema de ecuaciones lineales de la forma A·X = B.
@@ -45,11 +45,14 @@ class LinearSystem(Printable):
     o sin solución (incompatibles), y soporta el parseo de ecuaciones
     desde strings.
     """
+    
+    from ...printing.printer_lin_sys import LinSysFormatter
+    latex_formatter = LinSysFormatter()
 
     def __init__(
         self, 
         value: Union[Matrix, MatrixLike],     # Matriz de coeficientes A
-        B: Union[Vector, VectorLike],         # Vector de términos independientes B
+        B: Union[Vector, VectorLike], *,        # Vector de términos independientes B
         repr_mode: MODES = "ANSW"
     ):
         """
@@ -65,12 +68,18 @@ class LinearSystem(Printable):
             - "Matrix-Sistem" o "MS": Visualiza como un sistema matricial.
             - "Augmented_Matrix" o "AM": Matriz aumentada.
         """
-        # Matriz de coeficientes
         self._value = value if isinstance(value, Matrix) else Matrix(value)
-        # Vector términos independientes
         self.B = B if isinstance(B, Vector) else Vector(B)
-        # Modo de representación
-        self.repr_mode = repr_mode
+        
+        self.latex_formatter.set_repr_mode(repr_mode)
+
+    def set_repr_mode(self, mode: MODES) -> None:
+        """
+        Cambia el modo de representación del sistema lineal.
+        """
+        if mode not in {'ANSW', 'LES', 'MAT-SYS', 'AUG-MAT', 'PARAM'}:
+            raise ValueError(f"Modo de representación no válido: {mode}")
+        self.latex_formatter.set_repr_mode(mode)
 
     @property
     def value(self):
@@ -89,11 +98,9 @@ class LinearSystem(Printable):
         Se asume que tienen la misma dimensión.
         """
         # Suponiendo que Matrix y Vector soportan la operación +
-        from typing import cast
         return LinearSystem(
             self._value.vstack(other._value),
             self.B.value + other.B.value,
-            repr_mode = cast(MODES, self.repr_mode)
         )
 
 
@@ -207,106 +214,7 @@ class LinearSystem(Printable):
         """
         Genera la representación en LaTeX según el modo seleccionado.
         """
-        mode_map = {
-            'ANSW': self._as_solutions,
-            'PARAM': self._parametric_solution,
-            'LES': self._as_linear_equations,
-            'MAT-SYS': self._as_matrix_system,
-            'AUG-MAT': self._as_augmented_matrix,
-        }
-        try:
-            body = mode_map[self.repr_mode]()
-        except KeyError:
-            raise ValueError(f"Modo de representación no válido: {self.repr_mode}")
-
-        if name:
-            return rf"\begin{{equation}}\label{{{name}}}{body}\end{{equation}}"
-        return f"${body}$"
-
-    def _as_augmented_matrix(self) -> str:
-        n, m = self.shape
-        cols = 'c' * m + '|c'
-        rows: List[str] = []
-        for i in range(n):
-            coeffs = [Scalar(self._value[i][j]).latex() for j in range(m)]
-            coeffs.append(Scalar(self.B[i]).latex())
-            rows.append(' & '.join(coeffs))
-        body = (
-            r"\left(\begin{array}{" + cols + r"}" + 
-            r" \\ ".join(rows) + 
-            r"\end{array}\right)"
-        )
-        return body
-
-    def _as_matrix_system(self) -> str:
-        m = self.shape[1]
-        vecX = r"\begin{pmatrix}" + r" \\ ".join(f"x_{{{j+1}}}" for j in range(m)) + r"\end{pmatrix}"
-        return f"{self.value.latex()} {vecX} = {self.B.latex()}"
-
-    def _as_linear_equations(self) -> str:
-        n, m = self.shape
-        lines: List[str] = []
-        for i in range(n):
-            terms: List[str] = []
-            for j in range(m):
-                coef = Scalar(self._value[i][j])
-                if coef == 0:
-                    continue
-                terms.append(self._format_term(coef, j + 1, first=not terms))
-            lhs = '0' if not terms else ' '.join(terms)
-            rhs = Scalar(self.B[i]).latex()
-            lines.append(f"& {lhs} & = & {rhs}")
-        return r"\begin{aligned}" + r" \\ ".join(lines) + r"\end{aligned}"
-
-    def _format_term(self, coef: 'Scalar', var_idx: int, first: bool) -> str:
-        sign = '' if coef > 0 and first else ('-' if coef < 0 else '+')
-        abs_coef = abs(coef)
-        coef_str = '' if abs_coef == 1 else str(abs_coef.latex())
-        return f"{sign}{coef_str}x_{{{var_idx}}}"
-
-    def _as_solutions(self) -> str:
-        sol = self.solve()
-        if isinstance(sol, Vector):
-            lines = [f"x_{{{i+1}}} = {Scalar(val).latex()}" for i, val in enumerate(sol)]
-            return r"\begin{cases}" + r" \\ ".join(lines) + r"\end{cases}"
-
-        if isinstance(sol, list):
-            return self._parametric_solution()
-
-        return r"\emptyset"
-
-    def _parametric_solution(self) -> str:
-        A = self.value
-        B = self.B
-        aug = A.hstack(B)
-        rref_mat = aug.reduced_row_echelon_form()
-        _, m = A.shape
-        eqs: List[str] = []
-
-        for row in rref_mat.value:
-            coefs, const = row[:-1], row[-1]
-            if not any(c != 0 for c in coefs) and const == 0:
-                continue
-            terms: List[str] = []
-            for j, c in enumerate(coefs):
-                scalar_c = Scalar(c)
-                if scalar_c == 0:
-                    continue
-                terms.append(self._format_term(scalar_c, j+1, first=not terms))
-            rhs = Scalar(const).latex()
-            eqs.append(f"{' '.join(terms)} = {rhs}")
-
-        if not eqs:
-            return rf"\mathbb{{R}}^{{{m}}}"
-
-        vars_tex = r" \\ ".join(f"x_{{{i+1}}}" for i in range(m))
-        eqs_tex = r" \\ ".join(eqs)
-
-        return (
-            r"\displaystyle \left \{ \begin{pmatrix}" + vars_tex +
-            r"\end{pmatrix} \in \mathbb{R}^{" + str(m) + r"} \; \Bigg | \; \begin{cases}" +
-            eqs_tex + r"\end{cases} \right \}"
-        )
+        return self.latex_formatter(self, name=name)
 
     @staticmethod
     def parse_equations(equations: List[str]) -> "LinearSystem":
