@@ -1,4 +1,4 @@
-from typing import overload
+from typing import Optional, overload
 from ..linalg import Scalar, ScalarLike
 from ..quantity import ScalarQuantity
 import math
@@ -131,7 +131,7 @@ def sqrt(x: Scalar) -> Scalar: ...
 def sqrt(x: ScalarQuantity) -> ScalarQuantity: ...
 
 def sqrt(x):
-    func = cmath.sqrt if _is_complex(x) else math.sqrt
+    func: function = cmath.sqrt if _is_complex(x) else math.sqrt
     if isinstance(x, ScalarLike):
         return func(x)
     if isinstance(x, Scalar):
@@ -142,22 +142,26 @@ def sqrt(x):
 
 
 @overload
-def log(x: ScalarLike) -> ScalarLike: ...
+def log(x: ScalarLike, *, base: Optional[ScalarLike] = None) -> ScalarLike: ...
 @overload
-def log(x: Scalar) -> Scalar: ...
+def log(x: Scalar, *, base: Optional[ScalarLike] = None) -> Scalar: ...
 @overload
-def log(x: ScalarQuantity) -> ScalarQuantity: ...
+def log(x: ScalarQuantity, *, base: Optional[ScalarLike] = None) -> ScalarQuantity: ...
 
-def log(x):
+def log(x, *, base: Optional[ScalarLike] = None):
     func = cmath.log if _is_complex(x) else math.log
+    def apply_log(value: ScalarLike):
+        return func(value) if base is None else func(value, base)
+
     if isinstance(x, ScalarLike):
-        return func(x)
+        return apply_log(x)
     if isinstance(x, Scalar):
-        return Scalar(func(x.value))
+        return Scalar(apply_log(x.value))
     if isinstance(x, ScalarQuantity):
-        if x.units.is_one():
-            return ScalarQuantity(func(x.value.value), x.units)
-        raise ValueError("log() solo se puede aplicar a cantidades adimensionales")
+        if not x.units.is_one():
+            raise ValueError("log() solo se puede aplicar a cantidades adimensionales")
+        return ScalarQuantity(apply_log(x.value.value), x.units)
+    raise TypeError(f"log() no está definido para tipo {type(x)}")
 
 @overload
 def log10(x: ScalarLike) -> ScalarLike: ...

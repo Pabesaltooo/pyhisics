@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union, overload, TYPE_CHECKING
+from typing import Iterator, Union, overload, TYPE_CHECKING
 
 from ..linalg.structures.matrix.matrix import Matrix
 
@@ -15,6 +15,11 @@ class VectorQuantity(Quantity[Vector]): # Quiero que tambien sea de vectorial pa
     Representa una magnitud vectorial: Vector + unidad (fundamental o compuesta).
     Todas las componentes del vector comparten la misma unidad.
     """
+    
+    def __iter__(self) -> Iterator[ScalarQuantity]:
+        from .scalar_quantity import ScalarQuantity
+        for v in self.value:
+            yield ScalarQuantity(v, self.units)
     
     @overload
     def __mul__(self, other: Union[ScalarLike, Scalar, ScalarQuantity]) -> VectorQuantity: ...

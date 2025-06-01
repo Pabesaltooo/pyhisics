@@ -40,7 +40,7 @@ class LinSysFormatter(BasicPrinter):
             raise ValueError(f"Modo de representación no válido: {self.repr_mode}")
 
         if name:
-            return rf"\begin{{equation}}\label{{{name}}}{body}\end{{equation}}"
+            return rf"${name} = {body}$"
         return f"${body}$"
 
     @staticmethod
