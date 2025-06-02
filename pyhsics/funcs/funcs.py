@@ -82,7 +82,7 @@ def asin(x):
         return Scalar(func(x.value))
     if isinstance(x, ScalarQuantity):
         if x.units.is_one():
-            return ScalarQuantity(func(x.value.value), x.units)
+            return ScalarQuantity(func(x.value.value), unit='rad')
         raise ValueError("asin() solo se puede aplicar a cantidades adimensionales")
 
 @overload
@@ -100,7 +100,7 @@ def acos(x):
         return Scalar(func(x.value))
     if isinstance(x, ScalarQuantity):
         if x.units.is_one():
-            return ScalarQuantity(func(x.value.value), x.units)
+            return ScalarQuantity(func(x.value.value),  unit='rad')
         raise ValueError("acos() solo se puede aplicar a cantidades adimensionales")
 
 @overload
@@ -118,7 +118,7 @@ def atan(x):
         return Scalar(func(x.value))
     if isinstance(x, ScalarQuantity):
         if x.units.is_one():
-            return ScalarQuantity(func(x.value.value), x.units)
+            return ScalarQuantity(func(x.value.value), unit='rad')
         raise ValueError("atan() solo se puede aplicar a cantidades adimensionales")
 
 # --- FUNCIONES LOGARÍTMICAS Y EXPONENCIALES ---

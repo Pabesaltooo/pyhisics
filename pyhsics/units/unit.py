@@ -87,7 +87,7 @@ class Unit(Printable):
         base = str(self.composition)
         return base if self.prefix == 1.0 else f'{self.prefix} {base}'
 
-    def _repr_latex_(self): # devuelve una string en formato laTex
+    def _repr_latex_(self, name: Optional[str] = None) -> str:
         from ..printing.printer_unit import UnitTextFormater
         return "$" + UnitTextFormater.latex_str(self.composition.unit_dict) + "$" 
     
@@ -126,4 +126,7 @@ class Unit(Printable):
         return Unit.from_prefixed_unit(new)
     
     def is_one(self):
-        return self.composition.unit_dict == {}
+        return (
+            self.composition.unit_dict == {} or 
+            self.composition.unit_dict == {FundamentalUnit.ANGLE: 1}
+    )

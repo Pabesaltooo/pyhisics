@@ -10,7 +10,7 @@ from pyhsics.printing.setup import set_printing_mode
 from pyhsics.linalg import (Scalar, Point, Matrix, 
                             Vector, LinearSystem, BilinealForm)
 from pyhsics.units import Unit, UnitAliasManager
-from pyhsics.quantity import ScalarQuantity, VectorQuantity, Quantity, Constants
+from pyhsics.quantity import ScalarQuantity, VectorQuantity, Quantity, Constants, quantities
 from pyhsics.funcs import *
 from pyhsics.measure import DirectMeasure, CalculatedMeasure
 from pyhsics.plotter import Plotter, MultiPlotter
@@ -54,8 +54,10 @@ __all__ = [
     'VectorQuantity',
     'Constants',
     
+    'quantities',
+    
     "sin", "cos", "tan", "asin", "acos", "atan",
-    "sqrt", "log", "log10", "exp",
+    "sqrt", "log", "log10", "exp", "ln",
     
     'DirectMeasure',
     'CalculatedMeasure',

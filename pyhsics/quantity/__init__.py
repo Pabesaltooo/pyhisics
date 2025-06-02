@@ -10,10 +10,14 @@ from .vector_quantity import VectorQuantity
 from .matrix_quantity import MatrixQuantity
 from .constants import Constants
 
+from .quantities import quantities
+
 __all__ = [
     'Quantity',
     'VectorQuantity',
     'ScalarQuantity',
     'MatrixQuantity',
     'Constants',
+    
+    'quantities'
 ]

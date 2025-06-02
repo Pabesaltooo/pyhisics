@@ -134,7 +134,7 @@ class Quantity(QAddable[T], QMultiplyable[T], Printable, ABC, Generic[T]):
     @overload
     def __new__(cls, value: Union[MatrixLike, Matrix], unit: Union[str, Unit] = '1') -> MatrixQuantity: ...
     
-    def __new__(cls, value: Union[AlgLike, ALG_TYPES], unit: Union[str, Unit] = '1') -> 'Quantity[Any]':
+    def __new__(cls, value: Union[AlgLike, ALG_TYPES], unit: Union[str, Unit] = '1') -> Quantity[Any]:
         from .scalar_quantity import ScalarQuantity
         from .vector_quantity import VectorQuantity
         from .matrix_quantity import MatrixQuantity

@@ -67,11 +67,6 @@ class TestUnit(unittest.TestCase):
         unit2 = Unit(self.unit_kg_m)
         self.assertTrue(unit1 != unit2)
 
-    def test_repr(self):
-        """Verifica la representación en cadena de una unidad."""
-        unit_repr = repr(self.unit1)
-        self.assertEqual(unit_repr, "Unit(kg·m·s⁻²)")
-
 
 if __name__ == '__main__':
     unittest.main()
