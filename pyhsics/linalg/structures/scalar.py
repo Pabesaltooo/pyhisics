@@ -1,14 +1,4 @@
-# scalar.py  -----------------------------------------------------------
-# Implementación “type‑safe” de Scalar sobre la versión limpia
-# de algebraic_core.py entregada antes.
-# ---------------------------------------------------------------------
-#  •  Hereda únicamente de Algebraic[ScalarLike] y de los mixins
-#     específicos Addable / Multiplyable / MulInvertible previstos
-#     en el núcleo.
-#  •  Aplica sobrecargas (@overload) para __pow__ → ayuda al
-#     type‑checker a inferir el tipo devuelto.
-#  •  Evita imports circulares: sólo depende de algebraic_core.
-# ---------------------------------------------------------------------
+"""Type safe scalar implementation used by the linear algebra module."""
 
 from __future__ import annotations
 

@@ -1,10 +1,4 @@
-# vector.py  ---------------------------------------------------------------
-# Implementación “type‑safe” de Vector alineada con la versión de Scalar.
-# -------------------------------------------------------------------------
-#  • Usa Alias & Protocols definidos en algebraic_core.py
-#  • Mantiene los helpers clásicos (dot, norm, cross…)
-#  • Sólo admite *, / con escalares.  El dot‑product se expone como método.
-# -------------------------------------------------------------------------
+"""Vector type with helpers such as dot product and cross product."""
 
 from __future__ import annotations
 

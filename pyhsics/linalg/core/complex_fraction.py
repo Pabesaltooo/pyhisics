@@ -1,3 +1,5 @@
+"""Exact fractional representation of complex numbers."""
+
 from fractions import Fraction
 from math import lcm, gcd
 from typing import Union

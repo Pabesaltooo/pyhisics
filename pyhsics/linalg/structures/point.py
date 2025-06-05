@@ -1,3 +1,5 @@
+"""Representation of points in an affine space."""
+
 from __future__ import annotations
 from typing import Optional, overload, TYPE_CHECKING
 

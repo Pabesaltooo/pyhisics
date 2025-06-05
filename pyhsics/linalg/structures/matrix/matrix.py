@@ -1,3 +1,5 @@
+"""Full featured dense matrix implementation."""
+
 from __future__ import annotations
 from functools import cached_property
 from typing import Iterable, List, Literal, Optional, Self, SupportsIndex, Tuple, Union, overload
