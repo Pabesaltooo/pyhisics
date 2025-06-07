@@ -1,3 +1,5 @@
+"""Vector spaces constructed from ``Vector`` objects."""
+
 from typing import Optional, List, Tuple, overload, Union
 from collections import OrderedDict
 

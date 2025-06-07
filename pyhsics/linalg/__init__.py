@@ -1,3 +1,11 @@
+"""Linear algebra primitives exported for public use.
+
+This package exposes common algebraic structures such as ``Scalar`` and
+``Vector`` as well as solvers like ``LinearSystem``.  It gathers the most
+useful pieces of the :mod:`pyhsics.linalg` submodules so they can be imported
+directly from ``pyhsics.linalg``.
+"""
+
 from typing import Union
 
 from pyhsics.linalg.core.algebraic_core import ScalarLike, VectorLike, MatrixLike, Algebraic, T2Algebraic

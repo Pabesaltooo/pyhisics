@@ -1,3 +1,5 @@
+"""Internal helpers for the :class:`~pyhsics.linalg.structures.Matrix` class."""
+
 from typing import Iterable, Iterator, List, Tuple
 
 from pyhsics.linalg.core.algebraic_core import Algebraic, MatrixLike, ScalarLike

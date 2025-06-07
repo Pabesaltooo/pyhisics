@@ -1,3 +1,5 @@
+"""Affine transformations defined by a matrix and a translation vector."""
+
 from __future__ import annotations
 
 from pyhsics.printing.printable import Printable

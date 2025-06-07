@@ -1,3 +1,5 @@
+"""Standalone matrix algorithms used by :class:`Matrix`."""
+
 from pyhsics.linalg.structures import Scalar, Matrix
 
 class MatrixMethods:
