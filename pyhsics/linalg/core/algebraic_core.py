@@ -1,12 +1,11 @@
-# algebraic_core.py
-# --------------------------------------------------------------
-# Versión “clean‑typing” del núcleo algebraico
-# --------------------------------------------------------------
-#  • Evita isinstance(…, Union[…]) → se usan tuplas reales de tipos.
-#  • Se reemplazan TypeVar bound=Union por TypeAlias y Protocols.
-#  • Se eliminan dependencias cíclicas: los módulos hijo importan ESTO,
-#    no al revés.  Las factorías viven en `T2Algebraic`.
-# --------------------------------------------------------------
+
+"""Core protocols and aliases for the algebraic structures.
+
+This module provides the low level building blocks used by the linear algebra
+objects.  It defines ``ScalarLike`` and friends together with mixin protocols
+implementing common operations.  Modules under :mod:`pyhsics.linalg` rely on
+these definitions to remain type-safe and avoid circular imports.
+"""
 
 from __future__ import annotations
 

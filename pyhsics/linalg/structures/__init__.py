@@ -1,3 +1,5 @@
+"""Concrete algebraic structures used across the library."""
+
 from pyhsics.linalg.structures.scalar import Scalar
 from pyhsics.linalg.structures.vector import Vector
 from pyhsics.linalg.structures.point import Point

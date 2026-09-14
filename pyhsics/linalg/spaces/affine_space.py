@@ -1,3 +1,5 @@
+"""Implementation of affine spaces built on top of ``Vector`` and ``Point``."""
+
 from pyhsics.linalg.spaces.vector_space import VectorSpace
 from pyhsics.linalg.structures import Point, Vector
 from pyhsics.printing.printable import Printable

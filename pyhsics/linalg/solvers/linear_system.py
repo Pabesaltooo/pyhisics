@@ -1,3 +1,5 @@
+"""Utilities for solving systems of linear equations."""
+
 import sys
 from typing import List, Optional, Set, Union, Dict, Tuple
 import re
